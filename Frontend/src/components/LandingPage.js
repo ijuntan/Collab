@@ -370,7 +370,7 @@ const LandingFooter = (props) => {
       
 
       <div class="
-        flex flex-col gap-4 pt-20
+        flex flex-col gap-4 py-20
       ">
         <div class="
           text-2xl text-white

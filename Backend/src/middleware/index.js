@@ -17,12 +17,10 @@ module.exports = {
     signup: (req, res, next) => {
         const Schema = Joi.object({
             username: Joi.string(),
-            password: Joi.string()
-            // password: Joi.string().regex(
-            //     // must contain at least 1 lowercase
-            //     // the password should be between 8-32
-            //     new RegExp("^(?=.*[A-Za-z])(?=.*[0-9])(?=.{8,32})")
-            // )
+            email: Joi.string().email({minDomainSegments:2}),
+            password: Joi.string().regex(
+                new RegExp("^[a-zA-Z0-9]{8,32}$")
+            )
         })
         
         const {error} = Schema.validate(req.body)
@@ -30,7 +28,9 @@ module.exports = {
             switch(error.details[0].context.key){
                 case 'username':
                     res.status(400).send({error: "Invalid username"})
-                    console.log(error.details[0])
+                    break;
+                case 'email':
+                    res.status(400).send({error: "Invalid email"})
                     break;
                 case 'password':
                     res.status(400).send({error: "Invalid password"})

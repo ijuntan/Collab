@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/authService';
 import { Dialog, Transition } from '@headlessui/react'
 import { Link } from 'react-router-dom'
+import {MdVisibility as Eyes, MdVisibilityOff as NoEyes} from 'react-icons/md'
 
 const LoginForm = (props) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -13,7 +14,11 @@ const LoginForm = (props) => {
     const [password, setPassword] = useState('')
     const {jwt, setJwt} = useContext(MainContext)
     const history = useNavigate()
-  
+
+    const handleForgotPassword = () => {
+      history('/forgot-password')
+    }
+    
     const handleChange = (e) => {
       switch(e.target.name) {
           case 'username':
@@ -79,7 +84,7 @@ const LoginForm = (props) => {
                   Login
                 </Dialog.Title>
   
-                <form class="flex flex-col gap-10">
+                <div class="flex flex-col gap-10">
                   <div class="
                     relative m-y-8
                     w-full h-10 
@@ -109,15 +114,28 @@ const LoginForm = (props) => {
                       Username
                     </label>
                   </div>
-                  
   
                   <div class="
                     relative m-y-8
                     w-full h-10 
                     border-b-2 border-black
                   ">
-                    <input 
-                      type='password'
+                    <button class="
+                      absolute top-1/2 right-1 -translate-y-1/2
+                      transition duration-500
+                    "
+                      onClick={()=>setShowPassword(!showPassword)}
+                    >
+                      {
+                        showPassword
+                        ?
+                        <Eyes/>
+                        :
+                        <NoEyes/>
+                      }
+                    </button>
+                    <input
+                      type={showPassword?'text':'password'}
                       class="
                         bg-transparent border-none outline-none
                         w-full h-full
@@ -140,7 +158,7 @@ const LoginForm = (props) => {
                       Password
                     </label>
                   </div>
-                </form>
+                </div>
   
                 <button 
                     class="w-full bg-amber-700 rounded-md mt-10 mb-4 py-2 font-bold text-white"
@@ -155,6 +173,10 @@ const LoginForm = (props) => {
                     Register
                   </button>
                 </div>
+
+                <button class="flex gap-1 text-sm" onClick = {handleForgotPassword}>
+                  Forget Password?
+                </button>
               </Dialog.Panel>
             </Transition.Child>
           </div>

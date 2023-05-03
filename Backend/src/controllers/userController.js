@@ -2,9 +2,10 @@ const jwt = require('jsonwebtoken');
 const { User } = require('../models')
 const config = require('../config/config');
 const sendEmail = require('../services/sendEmail');
+const crypto = require('crypto')
 
 function jwtSignUser(user) {
-    const ONE_WEEK = 7 * 24 * 60 * 60
+    const ONE_WEEK = 7 
     return jwt.sign(user, config.JwtSecret, {
         expiresIn: ONE_WEEK
     })
@@ -29,9 +30,9 @@ module.exports = {
             return res.send({user: userObjJson, token: jwtSignUser(userObjJson)})
 
         } catch(error) {
-            //console.log(error)
-            if(Object.keys(error.keyValue[0] === 'username')){
-                return res.status(400).send({error: 'This username exists'})
+            console.log(error)
+            if(Object.keys(error.keyValue[0] === 'username' || error.keyValue[0] === 'email')){
+                return res.status(400).send({error: 'This username or email exists'})
             }
             return res.status(400).send({error: 'Something is wrong'})
         }
@@ -64,26 +65,26 @@ module.exports = {
 
     async forgotpassword(req, res) {
         try {
-            const { username } = req.body;
-            const user = await User.findOne({username})
-            console.log(username)
+            const { email } = req.body;
+            const user = await User.findOne({email})
+
             if(!user) {
-                return res.status(400).send({error: "No username found!"})
+                return res.status(400).send({error: "No user with that email found!"})
             }
             
             const resetToken = await user.getReset();
             await user.save();
 
-            const resetUrl = `http://localhost:8080/resetpassword/${resetToken}`
+            const resetUrl = `http://localhost:3000/reset-password/${resetToken}`
 
             const message = `
-                <h1> halo bry </h1>
-                <a href = ${resetUrl} clicktracking = off> ${resetUrl} </a>
+                <h1> Here is the reset link to your account! Beware on sharing this link. </h1>
+                <a href = ${resetUrl} clicktracking = off> Reset Password Link </a>
             `;
             
             try {
                 await sendEmail({
-                    to: user.username,
+                    to: user.email,
                     subject: "Password Reset Request",
                     text: message,
                 })
@@ -120,8 +121,12 @@ module.exports = {
                 return res.status(500).send({error: "Link Error"})
             }
 
-            await user.updateOne()
+            user.password = req.body.password;
+            user.resetPasswordToken = undefined;
+            user.resetPasswordExpire = undefined;
+            await user.save();
 
+            return res.status(200).send({success: true, data: "Reset password success"})
             
         } catch(error) {
             return res.status(500).send({error: "Reset password error"})

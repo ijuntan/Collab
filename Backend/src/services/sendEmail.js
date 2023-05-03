@@ -1,11 +1,11 @@
 const nodemailer = require('nodemailer')
-
+const config = require('../config/config')
 const sendEmail = (options) => {
     const transporter = nodemailer.createTransport({
         service: 'hotmail',
         auth: {
-            user: 'juniortanaya@outlook.com',
-            pass: 'valhalla1099'
+            user: config.email,
+            pass: config.pass
         }
     })
 
