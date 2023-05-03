@@ -15,6 +15,11 @@ const UserSchema = new Schema({
             unique: true
         }
     },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
     password: {
         type: String,
         required: true,
@@ -58,7 +63,7 @@ UserSchema.methods.getReset = async function(){
 
     // Hash token (private key) and save to database
     this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    this.resetPasswordExpire = Date.now() + 10 * (60 * 1000);
+    this.resetPasswordExpire = Date.now() + 10 * (60 * 1000); ;
 
     return resetToken
 }

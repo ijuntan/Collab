@@ -3,13 +3,14 @@ import { MainContext } from '../MainContext';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../services/authService';
 import { Dialog, Transition } from '@headlessui/react'
-import { Link } from 'react-router-dom'
+import {MdVisibility as Eyes, MdVisibilityOff as NoEyes} from 'react-icons/md'
+
 
 const SignUpForm = (props) => {
     const [showPassword, setShowPassword] = useState(false);
-    const handleClickShowPassword = () => setShowPassword((showPassword) => !showPassword);
     
     const [username, setUsername] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const {jwt, setJwt} = useContext(MainContext)
     const history = useNavigate()
@@ -17,13 +18,16 @@ const SignUpForm = (props) => {
     const handleChange = (e) => {
       switch(e.target.name) {
           case 'username':
-              setUsername(e.target.value)
-              break;
+            setUsername(e.target.value)
+            break;
+          case 'email':
+            setEmail(e.target.value)
+            break;
           case 'password':
-              setPassword(e.target.value)
-              break;
+            setPassword(e.target.value)
+            break;
           default:
-              break;
+            break;
       }
       
     }
@@ -34,6 +38,7 @@ const SignUpForm = (props) => {
         try {
             const user = {
                 username,
+                email,
                 password
             }
             const response = await AuthService.signup(user)
@@ -83,13 +88,14 @@ const SignUpForm = (props) => {
                   Sign Up
                 </Dialog.Title>
   
-                <form class="flex flex-col gap-10">
+                <div class="flex flex-col gap-10">
                   <div class="
                     relative m-y-8
                     w-full h-10 
                     border-b-2 border-black
                   ">
-                    <input 
+                    <input
+                      required
                       type='text'
                       class="
                         bg-transparent border-none outline-none
@@ -98,7 +104,6 @@ const SignUpForm = (props) => {
                       "
                       name="username"
                       value={username || ""}
-                      required
                       onChange = {e => handleChange(e)}
                     />
                     <label 
@@ -114,21 +119,64 @@ const SignUpForm = (props) => {
                     </label>
                   </div>
                   
-  
                   <div class="
                     relative m-y-8
                     w-full h-10 
                     border-b-2 border-black
                   ">
-                    <input 
-                      type='password'
+                    <input
+                      required
+                      type='text'
+                      class="
+                        bg-transparent border-none outline-none
+                        w-full h-full
+                        peer font-bold
+                      "
+                      name="email"
+                      value={email || ""}
+                      onChange = {e => handleChange(e)}
+                    />
+                    <label 
+                      class="
+                        absolute top-1/2 left-1 -translate-y-1/2
+                        pointer-events-none
+                        transition duration-500
+                        peer-focus:-translate-y-8 peer-focus:text-sm
+                        peer-valid:-translate-y-8 peer-valid:text-sm
+                      "
+                    >
+                      Email
+                    </label>
+                  </div>
+
+                  <div class="
+                    relative m-y-8
+                    w-full h-10 
+                    border-b-2 border-black
+                  ">
+                    <button class="
+                      absolute top-1/2 right-1 -translate-y-1/2
+                      transition duration-500
+                    "
+                      onClick={()=>setShowPassword(!showPassword)}
+                    >
+                      {
+                        showPassword
+                        ?
+                        <Eyes/>
+                        :
+                        <NoEyes/>
+                      }
+                    </button>
+                    <input
+                      required
+                      type={showPassword?'text':'password'}
                       class="
                         bg-transparent border-none outline-none
                         w-full h-full
                         peer font-bold
                       "
                       name="password"
-                      required
                       value={password}
                       onChange = {e => handleChange(e)}
                     />
@@ -144,7 +192,7 @@ const SignUpForm = (props) => {
                       Password
                     </label>
                   </div>
-                </form>
+                </div>
   
                 <button 
                     class="w-full bg-amber-700 rounded-md mt-10 mb-4 py-2 font-bold text-white"

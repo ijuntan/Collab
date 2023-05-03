@@ -10,7 +10,11 @@ module.exports = {
     extend: {
       height: {
         'hero': '900px',
-        'feat': '800px'
+        'feat': '800px',
+        'post': '300px',
+      },
+      width:{
+        'post': '800px',
       },
       backgroundImage: {
         'hero': "url('../public/images/book.jpg')",
