@@ -1,2 +1,0 @@
-# Collab
-NTUST Collab Project
