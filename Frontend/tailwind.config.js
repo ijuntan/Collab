@@ -12,6 +12,7 @@ module.exports = {
         'hero': '900px',
         'feat': '800px',
         'post': '300px',
+        'addpost': '500px'
       },
       width:{
         'post': '800px',

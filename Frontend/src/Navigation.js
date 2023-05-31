@@ -10,6 +10,7 @@ import PrivateScreen from './components/PrivateScreen'
 import { MainContextProvider } from './MainContext'
 import AuthComponent from './services/authComponent'
 import Settings from './components/Settings'
+import AddPost from './components/AddPost'
 
 const Navigation = () => {
     return (
@@ -26,6 +27,7 @@ const Navigation = () => {
                 }>
                     <Route path="" element = {<DashboardPage/>} />
                     <Route path="settings" element = {<Settings/>} />
+                    <Route path="addpost" element = {<AddPost/>} />
                 </Route>
             </Routes>
         </MainContextProvider>
