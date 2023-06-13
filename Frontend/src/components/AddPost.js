@@ -20,7 +20,7 @@ const AddPost = () => {
         {
             name: "",
             content: "",
-            category: ""
+            category: []
         }
     )
     
@@ -39,44 +39,44 @@ const AddPost = () => {
         }
     }
 
+    const handleCategory = (item) => {
+        if(!post.category.includes(item))
+            setPost(prev => ({...prev, category: [...post.category, item]}))
+    }
+
+    const deleteCategory = (item) => {
+        setPost(prev => ({...prev, category: post.category.filter(obj => obj != item)}))
+    }
+
     const createPost = async() => {
         const post_final = {
             name: post.name,
             content: post.content,
             category: post.category,
-            createdBy: user.username
+            like: 0,
+            createdBy: user._id
         }
-
+        console.log(post_final)
         await PostService.createPost(post_final)
         history('/dash')
     }
 
     return (
         <div class="flex justify-center items-center h-screen w-screen">
-            <div class="flex flex-col mb-20 gap-4 w-post">
+            <div class="flex flex-col gap-4 w-post">
 
-                <div>
+                <div class="flex">
                     <Menu>
                         <Menu.Button class="inline-flex justify-center items-center rounded-md bg-amber-800 px-4 py-2 text-sm font-medium text-white hover:bg-amber-900">
-                            {
-                                post.category === ""
-                                ?
-                                    <>
-                                    Category
-                                    </>
-                                :
-                                    <>
-                                    {post.category}
-                                    </>
-                            }
+                            Choose Category
                             <Down class="ml-2 -mr-1 h-5 w-5"/>
                         </Menu.Button>
-                        <Menu.Items class="absolute flex flex-col mt-2 bg-white rounded-lg p-2">
+                        <Menu.Items class="absolute flex flex-col mt-2 bg-white rounded-lg p-2 ml-14">
                             {
                                 category.map((item, index) => (
                                     <Menu.Item key={index}>
                                         <button class="hover:bg-slate-200 hover:rounded-lg p-2"
-                                            onClick={() => setPost(prev => ({...prev, category: item}))}
+                                            onClick={() => handleCategory(item)}
                                         >
                                             {item}
                                         </button>
@@ -85,6 +85,21 @@ const AddPost = () => {
                             }
                         </Menu.Items>
                     </Menu>
+
+                    <div class="flex flex-wrap grow justify-end gap-2">
+                        {
+                            post.category.map((item, index) => (
+                                <div class="flex gap-2 rounded-lg px-2 py-1 bg-amber-800 text-white" key={index}>
+                                    {item}
+                                    <button class="flex item-center text-red-200"
+                                        onClick={() => deleteCategory(item)}
+                                    >
+                                        x
+                                    </button>
+                                </div>
+                            ))
+                        }
+                    </div>
                 </div>
                             
                 <div class='h-20 rounded-lg bg-amber-700 p-4'>

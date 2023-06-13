@@ -11,6 +11,7 @@ import { MainContextProvider } from './MainContext'
 import AuthComponent from './services/authComponent'
 import Settings from './components/Settings'
 import AddPost from './components/AddPost'
+import PostScreen from './components/PostScreen'
 
 const Navigation = () => {
     return (
@@ -28,6 +29,7 @@ const Navigation = () => {
                     <Route path="" element = {<DashboardPage/>} />
                     <Route path="settings" element = {<Settings/>} />
                     <Route path="addpost" element = {<AddPost/>} />
+                    <Route path="post/:id" element = {<PostScreen/>} />
                 </Route>
             </Routes>
         </MainContextProvider>

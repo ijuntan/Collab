@@ -11,11 +11,12 @@ module.exports = {
       height: {
         'hero': '900px',
         'feat': '800px',
-        'post': '300px',
-        'addpost': '500px'
+        'post': '30vh',
+        'addpost': '50vh'
       },
       width:{
-        'post': '800px',
+        '70vw': '70vw',
+        'post': '50vw'
       },
       backgroundImage: {
         'hero': "url('../public/images/book.jpg')",
@@ -30,6 +31,9 @@ module.exports = {
           500: "#DFCAA0",
           600: "#CFB284"
         } 
+      },
+      padding: {
+        '5%': '5vh'
       },
       borderRadius:{
         'xlg':'70px'

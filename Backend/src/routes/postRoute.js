@@ -11,6 +11,10 @@ router.get('/', (req, res) => {
 router.get('/getpost', postController.getPost)
 router.get('/getpostbycategory/:category', postController.getPostByCategory)
 router.get('/getpostbysearch/:search', postController.getPostBySearch)
+router.get('/getpostbyid/:id', postController.getPostById)
 router.post('/createpost', postController.createPost)
-
+router.post('/createcomment', postController.createComment)
+router.post('/actiontopost', postController.actionToPost)
+router.put('/updateactionpost', postController.updateActionPost)
+router.get('/getactionbyuser/:id', postController.getActionUser)
 module.exports = router
