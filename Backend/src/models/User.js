@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 
-const { Schema } = mongoose;
+const { Schema, Types } = mongoose;
 
 const UserSchema = new Schema({
     username: {
@@ -23,6 +23,16 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true,
+    },
+    posts: {
+        type: [Types.ObjectId],
+        ref: "Post",
+        required: false
+    },
+    comments: {
+        type: [Types.ObjectId],
+        ref: "Comment",
+        required: false
     },
     resetPasswordToken: String,
     resetPasswordExpire: Date

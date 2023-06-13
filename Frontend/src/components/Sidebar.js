@@ -17,9 +17,9 @@ const Sidebar = () => {
                     {
                         closeChat
                         ?
-                            <Up/>
-                        :
                             <Down/>
+                        :
+                            <Up/>
                     }
                 </button>
             </div>
