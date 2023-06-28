@@ -12,7 +12,7 @@ const scroll = (ref) => {
 }
 
 const FadeIn = ({ children, on }) => {
-  return <div class="animate-fadeIn" key={on}>{children}</div>
+  return <div className="animate-fadeIn" key={on}>{children}</div>
 }
 
 const LandingHeader = (props) => {
@@ -32,26 +32,27 @@ const LandingHeader = (props) => {
   ]
 
   return (
-    <header ref={props.headerRef} class="
+    <header ref={props.headerRef} className="
         flex justify-between items-center
         p-4
     ">
       <img src = "images/collab.png" alt='logo' 
-          class="
+          className="
           h-14 ml-2 p-2
           "
       />
 
-      <ul class=" max-sm:hidden
+      <ul className=" max-sm:hidden
           flex justify-center items-center gap-7
           text-white text-lg font-medium pl-16
       ">
           {
               headerContent.map( item => (
-                  <li class="
+                  <li className="
                     hover:text-cream-400
                     transition duration-500
                     "
+                    key={item.name}
                   >
                     <button onClick={() => scroll(item.ref)}>
                       {item.name}
@@ -61,7 +62,7 @@ const LandingHeader = (props) => {
           }
       </ul>
       
-      <button class="
+      <button className="
         text-white rounded 
         border border-2 border-cream-300
         py-2 px-10 
@@ -86,17 +87,17 @@ const LandingHero = () => {
   Bring Your Project to Life!
   `
   return(
-    <div class="
+    <div className="
       flex flex-col grow justify-center items-center gap-8 pb-20
     ">
-      <div class="
+      <div className="
         font-extrabold 
         text-8xl text-white
       ">
         {heroTitle}
       </div>
 
-      <div class="
+      <div className="
         font-bold px-8
         text-2xl text-cream-200
       ">
@@ -136,38 +137,38 @@ const LandingFeature = (props) => {
     
   ]
   return(
-    <div ref={props.featureRef} class="
+    <div ref={props.featureRef} className="
         flex flex-col h-auto gap-20
         rounded-t-xlg -mt-16 z-10 py-20 px-16
         bg-gradient-radial from-amber-200 to-amber-700 to-50%
     ">
 
-        <div class="
+        <div className="
           text-9xl text-cream-200 text-center font-bebas
           mt-20 [text-shadow:40px_40px_rgb(69_26_3)] animate-pulse 
         ">
           {featureTitle}
         </div>
 
-        <div class="
+        <div className="
           flex justify-around flex-wrap py-36
         ">
 
           {featureContent.map(item => (
-            <div class="
+            <div className="
               flex flex-col items-center gap-4 pb-20
-            ">
+            " key={item.title}>
               <img src={item.img} alt={item.title}
-                class="rounded-xl w-full max-h-72"
+                className="rounded-xl w-full max-h-72"
               />
               
-              <div class="
+              <div className="
                 text-4xl font-bold text-white pt-10
               ">
                 {item.title}
               </div>
 
-              <div class="
+              <div className="
                 text-l text-center
                 max-w-md
               ">
@@ -204,32 +205,32 @@ const LandingWork = (props) => {
     }
   ]
   return (
-    <div ref={props.worksRef} class="
+    <div ref={props.worksRef} className="
       flex flex-col py-40 px-20 flex-wrap
       bg-amber-950
     ">
-      <div class="
+      <div className="
         font-bebas text-9xl text-cream-400 text-center
         md:border-r-8
       ">
         How Does It Work?
       </div>
 
-      <div class="
+      <div className="
         flex flex-col pt-40
       ">
         {workContent.map( item => (
-          <div class="
+          <div className="
             flex flex-col items-center
-          ">
-            <div class="
+          " key={item.title}>
+            <div className="
               flex justify-center items-center p-5 gap-10
             ">
               <img src={item.img} alt={item.name}
                 
               />
 
-              <div class="
+              <div className="
                 text-4xl font-bold text-white
               ">
                 {item.title}
@@ -238,13 +239,13 @@ const LandingWork = (props) => {
             </div>
 
             <img src="/images/arrow.png" alt={item.name}
-                class="invert h-auto w-20 py-10"
+                className="invert h-auto w-20 py-10"
             />
           </div>
         ))}
         
 
-        <div class="
+        <div className="
           font-bebas text-9xl text-cream-400 text-center
           pt-20
         ">
@@ -285,10 +286,10 @@ const LandingTest = (props) => {
   ]
 
   return (
-    <div ref={props.testimonialRef} class="
+    <div ref={props.testimonialRef} className="
       flex py-20 sm:px-20 max-sm:px-10 bg-white max-xl:flex-col border
     ">
-      <div class="
+      <div className="
         flex shrink text-bebas items-center justify-center
         xl:text-5xl max-xl:text-4xl text-center font-bold
         max-xl:py-10 xl:px-10 xl:border-r  
@@ -296,30 +297,31 @@ const LandingTest = (props) => {
         Our Beloved Users' Words
       </div>
 
-      <div class="flex flex-col flex-1">
-        <button class="flex justify-center pt-10">
+      <div className="flex flex-col flex-1">
+        <button className="flex justify-center pt-10">
           <FadeIn on={currentUser}>
-            <img src={userTest[currentUser].img} alt='pf1' class="w-40 h-40 border border-gray-900 border-2 rounded-full"/>
+            <img src={userTest[currentUser].img} alt='pf1' className="w-40 h-40 border border-gray-900 border-2 rounded-full"/>
           </FadeIn>
         </button>
 
-        <div class="flex justify-center pt-5 font-bold">
+        <div className="flex justify-center pt-5 font-bold">
           {userTest[currentUser].name}
         </div>
 
-        <div class="flex justify-center py-10">
-          <div class="w-1/2 text-center">
+        <div className="flex justify-center py-10">
+          <div className="w-1/2 text-center">
             {userTest[currentUser].text}
           </div>
         </div>
 
-        <div class="flex justify-around pb-10 xl:px-10">
+        <div className="flex justify-around pb-10 xl:px-10">
           {
             userTest.map( item => (
-              <button class="flex justify-center pt-10"
+              <button className="flex justify-center pt-10"
                 onClick={() => setCurrentUser(item.id)}
+                key={item.id}
               >
-                <img src={item.img} alt='pf1' class="w-20 h-20 border border-gray-900 border-2 rounded-full"/>
+                <img src={item.img} alt='pf1' className="w-20 h-20 border border-gray-900 border-2 rounded-full"/>
               </button>
             ))
           }
@@ -359,50 +361,50 @@ const LandingFooter = (props) => {
   ]
 
   return(
-    <div class="
+    <div className="
       flex justify-center
       bg-amber-900 gap-20 px-20 ease-in-out
     "
     >
-      <div class="flex-1 max-lg:hidden"> 
-        <img src="images/collab.png" alt="logo" class="h-80 p-16"/>
+      <div className="flex-1 max-lg:hidden"> 
+        <img src="images/collab.png" alt="logo" className="h-80 p-16"/>
       </div>
       
 
-      <div class="
+      <div className="
         flex flex-col gap-4 py-20
       ">
-        <div class="
+        <div className="
           text-2xl text-white
           font-bebas border-b-4
         ">
           About Us
         </div>
         {footerContent.map( item => (
-          <button onClick={() => scroll(item.ref)} class="
+          <button onClick={() => scroll(item.ref)} className="
             text-xl text-white text-left
             font-bebas 
-          ">
+          " key={item.name}>
             {item.name}
           </button>
         ))}
       </div>
       
-      <div class="
+      <div className="
         flex flex-col gap-4 pt-20 
       ">
-        <div class="
+        <div className="
           text-2xl text-white
           font-bebas border-b-4
         ">
           Contact Us
         </div>
 
-        <div class="
+        <div className="
           flex gap-2 justify-between
         ">
           {footerLogo.map( item => (
-          <img src={item.name} alt="logo" class="h-10 invert brightness-0"/>
+          <img key={item.name} src={item.name} alt="logo" className="h-10 invert brightness-0"/>
         ))}
           
         </div>
@@ -432,9 +434,9 @@ function LandingPage() {
   });
 
   return (
-    <div class={`flex flex-col max-w-full overflow-hidden`}>
+    <div className={`flex flex-col max-w-full overflow-hidden`}>
       
-      <div class={`
+      <div className={`
       flex flex-col
       drop-shadow-2xl
       bg-hero bg-no-repeat bg-cover bg-fixed bg-center 
@@ -467,11 +469,11 @@ function LandingPage() {
       />
 
       { showFab &&
-        <button class="fixed bg-black bottom-10 right-10 z-50 text-white rounded-full p-3" 
+        <button className="fixed bg-black bottom-10 right-10 z-50 text-white rounded-full p-3" 
           onClick={()=>scroll(headerRef)}
         >
           <FadeIn on={showFab}>
-            <img src="images/up.svg" alt="up" class="w-10 invert"/>
+            <img src="images/up.svg" alt="up" className="w-10 invert"/>
           </FadeIn>
         </button>
       }

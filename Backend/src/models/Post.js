@@ -15,6 +15,10 @@ const PostSchema = new Schema({
         type: [String],
         required: true,
     },
+    tag: {
+        type: String,
+        required: true
+    },
     like: {
         type: Number,
         required: true
@@ -23,6 +27,11 @@ const PostSchema = new Schema({
         type: [Types.ObjectId],
         ref:'Comment',
         required: false
+    },
+    image: {
+        data: Buffer,
+        contentType: String,
+        required: false,
     },
     createdBy: {
         type: Types.ObjectId,
