@@ -12,9 +12,19 @@ function jwtSignUser(user) {
 }
 
 module.exports = {
+    async getUserByName(req, res) {
+        try {
+            const {name} = req.params
+            const user = await User.findOne({username: name}).select("-password")
+
+            return res.status(200).send(user)
+        }
+        catch(err) {
+            return res.status(500).send({error: "Get Error"})
+        }
+    },
     findByID: (req, res) => {
         const {user} = req;
-        
         if(!user) {
             return res.status(400).send('Server is having issues, please try again!');
         }
@@ -51,10 +61,11 @@ module.exports = {
             if(!isPasswordValid){
                 return res.status(400).send({error: "The login information is incorrect"})
             }
+            
+            const tempUser = await User.findOne({username}).select("-password")
+            const userObjJson = tempUser.toJSON();
 
-            const userObjJson = user.toJSON();
-            return res.send({
-                user: userObjJson,
+            return res.status(200).send({
                 token: jwtSignUser(userObjJson)
             })
 

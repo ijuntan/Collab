@@ -1,6 +1,6 @@
 module.exports = {
     db: {
-        mongoURI: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/node-auth'
+        mongoURI: 'mongodb+srv://juntan:dfygEdAdSO21WmtX@collab.iejbp1z.mongodb.net/'
     },
     JwtSecret: process.env.JWT_SECRET || "super_secret",
     email: 'juniortanaya@outlook.com',
