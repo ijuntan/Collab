@@ -49,8 +49,7 @@ module.exports = {
       },
       animation:{
         fadeIn: 'fadeIn 500ms ease-in-out'
-        
-      }
+      },
     },
   },
   plugins: [],

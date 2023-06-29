@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import AuthService from '../services/authService'
+import AuthService from '../../services/authService'
 import { useNavigate } from 'react-router-dom'
 
 const ForgotPassword = () => {
@@ -30,52 +30,52 @@ const ForgotPassword = () => {
         }
     }
     return (
-            <div class="
+            <div className="
                 flex flex-col h-screen
             ">
-                <header class="
+                <header className="
                     h-20 bg-amber-700
                 "/>
-                <div class="
+                <div className="
                     flex grow justify-center items-center
                 ">
-                    <div class="
+                    <div className="
                         flex flex-col relative gap-2 mb-20
                         border border-radius border-2 border-transparent
                         rounded-lg p-6 bg-amber-700
                     ">
-                        <div class="
+                        <div className="
                             absolute right-2 top-1 flex justify-end
                         ">
-                            <button onClick={handleBack} class="text-white font-bold hover:text-gray-200">
+                            <button onClick={handleBack} className="text-white font-bold hover:text-gray-200">
                                 x
                             </button>
                         </div>
                         
                         {
                             successMsg &&
-                            <div class="flex wrap w-80 mt-4 text-green-400">
+                            <div className="flex wrap w-80 mt-4 text-green-400">
                                 Reset link sent to your email successfully!
                             </div>
                         }
                         
                         {
                             errorMsg &&
-                            <div class="flex wrap w-80 mt-4 text-rose-950">
+                            <div className="flex wrap w-80 mt-4 text-rose-950">
                                 Something has gone wrong, try again!
                             </div>
                         }
-                        <div class="flex wrap w-80 mt-4 text-white">
+                        <div className="flex wrap w-80 mt-4 text-white">
                             Enter the email associated with your account and we'll send you a link to reset your password.
                         </div>
 
-                        <div class="
+                        <div className="
                             relative my-8 pl-2
                             w-full h-10 
                             border-2 border-black rounded
                             ">
                             <input 
-                                class="
+                                className="
                                 bg-transparent border-none outline-none
                                 w-full h-full
                                 peer font-bold
@@ -88,7 +88,7 @@ const ForgotPassword = () => {
                             />
                         </div>
 
-                        <button class="
+                        <button className="
                             bg-transparent rounded-lg p-4 font-bold border-white border text-white
                             hover:bg-white hover:text-amber-700
                         "
@@ -97,7 +97,7 @@ const ForgotPassword = () => {
                             Submit
                         </button>
 
-                        <button class="
+                        <button className="
                             bg-cream-200 rounded-lg p-4 font-bold text-amber-700
                             hover:contrast-125
                         "

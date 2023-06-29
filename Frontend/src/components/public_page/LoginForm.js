@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect, Fragment } from 'react'
-import { MainContext } from '../MainContext';
+import { MainContext } from '../../services/MainContext';
 import { useNavigate } from 'react-router-dom';
-import AuthService from '../services/authService';
+import AuthService from '../../services/authService';
 import { Dialog, Transition } from '@headlessui/react'
 import { Link } from 'react-router-dom'
 import {MdVisibility as Eyes, MdVisibilityOff as NoEyes} from 'react-icons/md'
@@ -59,8 +59,8 @@ const LoginForm = (props) => {
   
     return(
       <Transition show={props.showForm}>
-        <Dialog class="fixed inset-0" onClose={props.closeModal}>
-          <div class="flex min-h-full items-center justify-center">
+        <Dialog className="fixed inset-0" onClose={props.closeModal}>
+          <div className="flex min-h-full items-center justify-center">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -70,29 +70,29 @@ const LoginForm = (props) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel class="
+              <Dialog.Panel className="
                 flex flex-col 
                 backdrop-blur-lg p-10 rounded-lg 
                 border border-2 w-96
               "
               >
                 <Dialog.Title
-                  class="
+                  className="
                     text-6xl font-bebas text-center pb-10
                   "
                 >
                   Login
                 </Dialog.Title>
   
-                <div class="flex flex-col gap-10">
-                  <div class="
+                <div className="flex flex-col gap-10">
+                  <div className="
                     relative m-y-8
                     w-full h-10 
                     border-b-2 border-black
                   ">
                     <input 
                       type='text'
-                      class="
+                      className="
                         bg-transparent border-none outline-none
                         w-full h-full
                         peer font-bold
@@ -103,7 +103,7 @@ const LoginForm = (props) => {
                       onChange = {e => handleChange(e)}
                     />
                     <label 
-                      class="
+                      className="
                         absolute top-1/2 left-1 -translate-y-1/2
                         pointer-events-none
                         transition duration-500
@@ -115,12 +115,12 @@ const LoginForm = (props) => {
                     </label>
                   </div>
   
-                  <div class="
+                  <div className="
                     relative m-y-8
                     w-full h-10 
                     border-b-2 border-black
                   ">
-                    <button class="
+                    <button className="
                       absolute top-1/2 right-1 -translate-y-1/2
                       transition duration-500
                     "
@@ -136,7 +136,7 @@ const LoginForm = (props) => {
                     </button>
                     <input
                       type={showPassword?'text':'password'}
-                      class="
+                      className="
                         bg-transparent border-none outline-none
                         w-full h-full
                         peer font-bold
@@ -147,7 +147,7 @@ const LoginForm = (props) => {
                       onChange = {e => handleChange(e)}
                     />
                     <label 
-                      class="
+                      className="
                         absolute top-1/2 left-1 -translate-y-1/2
                         pointer-events-none
                         transition duration-500
@@ -161,20 +161,20 @@ const LoginForm = (props) => {
                 </div>
   
                 <button 
-                    class="w-full bg-amber-700 rounded-md mt-10 mb-4 py-2 font-bold text-white"
+                    className="w-full bg-amber-700 rounded-md mt-10 mb-4 py-2 font-bold text-white"
                     onClick = {e => handleSubmit(e)}
                 >
                   Login
                 </button>
   
-                <div class="flex gap-1">
+                <div className="flex gap-1">
                   Don't have an account?
-                  <button class="text-cream-300" onClick = {e => props.setShowLogin(false)}>
+                  <button className="text-cream-300" onClick = {e => props.setShowLogin(false)}>
                     Register
                   </button>
                 </div>
 
-                <button class="flex gap-1 text-sm" onClick = {handleForgotPassword}>
+                <button className="flex gap-1 text-sm" onClick = {handleForgotPassword}>
                   Forget Password?
                 </button>
               </Dialog.Panel>

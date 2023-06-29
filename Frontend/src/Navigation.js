@@ -1,17 +1,20 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 
-import LandingPage from './components/LandingPage'
-import DashboardPage from './components/DashboardPage'
-import ForgotPassword from './components/ForgotPassword'
-import ResetPassword from './components/ResetPassword'
-import PrivateScreen from './components/PrivateScreen'
+// Public Page
+import LandingPage from './components/public_page/LandingPage'
+import ForgotPassword from './components/public_page/ForgotPassword'
+import ResetPassword from './components/public_page/ResetPassword'
 
-import { MainContextProvider } from './MainContext'
+import { MainContextProvider } from './services/MainContext'
 import AuthComponent from './services/authComponent'
-import Settings from './components/Settings'
-import AddPost from './components/AddPost'
-import PostScreen from './components/PostScreen'
+
+// Private Page
+import PrivateScreen from './components/private_page/PrivateScreen'
+import Settings from './components/private_page/Settings'
+import AddPost from './components/private_page/AddPost'
+import PostScreen from './components/private_page/PostScreen'
+import DashboardPage from './components/private_page/DashboardPage'
 
 const Navigation = () => {
     return (

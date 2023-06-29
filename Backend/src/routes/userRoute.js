@@ -14,5 +14,6 @@ router.post('/login', userController.login)
 router.post('/forgotpassword', userController.forgotpassword)
 router.put('/resetpassword/:resetToken', userController.resetpassword)
 router.get('/dash', isAuthenticated, userController.findByID)
+router.get('/:name', userController.getUserByName)
 
 module.exports = router
