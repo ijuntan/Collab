@@ -34,6 +34,11 @@ const UserSchema = new Schema({
         ref: "Comment",
         required: false
     },
+    projects: {
+        type: [String],
+        //ref: "Comment",
+        required: false
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date
 }, {

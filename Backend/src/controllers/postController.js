@@ -1,11 +1,14 @@
 const jwt = require('jsonwebtoken');
 const { Post, Comment, User, Action } = require('../models')
 const config = require('../config/config');
+const { post } = require('../routes');
 
 module.exports = {
     async getPost(req, res) {
         try {
-            const posts = await Post.aggregate([{$sample: {size: 10}}])
+            //const posts = await Post.aggregate([{$sample: {size: 10}}])
+            const posts = await Post.find({}).populate("createdBy", "username")
+            console.log(posts)
             res.status(200).json(posts)
         } catch(error) {
             console.log(error)
@@ -38,8 +41,22 @@ module.exports = {
     async getPostById(req, res) {
         try {
             const {id} = req.params
-            const post = await Post.findById(id).populate("createdBy", "username").populate({path:"comment", populate:{path:"createdBy", select:"username"}})
-            res.status(200).json(post)
+            const post = await Post.findById(id).populate("createdBy", "username")
+            const comments = await Comment.find({to: id}).populate("createdBy", "username").populate({path:"comment", populate:{path:"createdBy", select:"username"}})
+            const post_final = {
+                _id: post._id,
+                post: post.name,
+                content: post.content,
+                category: post.category,
+                tag: post.tag,
+                like: post.like,
+                comment: comments,
+                image: post.image,
+                createdBy: post.createdBy,
+                createdAt: post.createdAt
+            }
+            console.log(post_final)
+            res.status(200).json(post_final)
         } catch(error) {
             console.log(error)
         }
@@ -47,7 +64,7 @@ module.exports = {
 
     async createPost(req, res) {
         try {
-            const post = await Post.create(req.body) 
+            const post = await Post.create(req.body)
             res.status(200).json(post)
         } catch(error) {
             console.log(error)
@@ -57,7 +74,10 @@ module.exports = {
     async createComment(req, res) {
         try {
             const comment = await Comment.create(req.body)
-            await Post.findOneAndUpdate({_id: comment.to}, {$push: {comment: comment._id}})
+            if(comment.to === "Post")
+                await Post.findOneAndUpdate({_id: comment.to}, {$push: {comment: comment._id}})
+            else
+                await Comment.findOneAndUpdate({_id: comment.to}, {$push: {comment: comment._id}})
             res.status(200).json(comment)
         } catch(error) {
             console.log(error)
