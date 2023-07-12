@@ -64,14 +64,17 @@ const Chatbox = ({
         const fetchMsg = async() => {
             try {
                 const conv = await ChatService.getConversation(account._id, user._id)
-                const msgs = conv.data.messages.sort((a,b) => new Date(b.date) - new Date(a.date))
-                setConversation(msgs)
+                if(conv.data) {
+                    const msgs = conv.data.messages.sort((a,b) => new Date(b.date) - new Date(a.date))
+                    setConversation(msgs)
+                }
+                else setConversation([])
             } catch(err) {
                 console.log(err)
             }
         }
         fetchMsg()
-    }, [ , setConversation])
+    }, [ , user, setConversation])
 
     const DateDiff = ({time}) => {
         const now = new Date()
@@ -127,7 +130,7 @@ const Chatbox = ({
                         </div>
                     ))
                     :
-                    <div className='flex text-black'>Loading</div>
+                    <div className='flex text-black'></div>
                 }
             </div>
              
