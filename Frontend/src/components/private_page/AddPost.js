@@ -167,7 +167,7 @@ const AddPost = ({
         <>
         {/* Normal and Question Post Dialog */}
         <Transition appear show={open} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={()=>setOpen(false)}>
+            <Dialog as="div" className="relative z-50" onClose={()=>setOpen(false)}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -376,7 +376,7 @@ const AddPost = ({
 
         {/* LFT Post Dialog */}
         <Transition appear show={openLFT} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={()=>setOpenLFT(false)}>
+            <Dialog as="div" className="relative z-50" onClose={()=>setOpenLFT(false)}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"
@@ -604,7 +604,7 @@ const AddPost = ({
 
         {/* LFM Post Dialog */}
         <Transition appear show={openLFM} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={()=>setOpenLFM(false)}>
+            <Dialog as="div" className="relative z-50" onClose={()=>setOpenLFM(false)}>
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"

@@ -17,7 +17,7 @@ const filterCategory = [
 ]
 
 const PrivateScreen = () => {
-    const user = useContext(UserContext);
+    const {user} = useContext(UserContext);
     const [searchContent, setSearchContent] = useState("")
 
     return (

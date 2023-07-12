@@ -8,7 +8,7 @@ module.exports = {
         try {
             //const posts = await Post.aggregate([{$sample: {size: 10}}])
             const posts = await Post.find({}).populate("createdBy", "username")
-            console.log(posts)
+            //console.log(posts)
             res.status(200).json(posts)
         } catch(error) {
             console.log(error)
@@ -55,7 +55,7 @@ module.exports = {
                 createdBy: post.createdBy,
                 createdAt: post.createdAt
             }
-            console.log(post_final)
+            //console.log(post_final)
             res.status(200).json(post_final)
         } catch(error) {
             console.log(error)
@@ -87,7 +87,7 @@ module.exports = {
     async actionToPost(req, res) {
         try {
             const action = await Action.create(req.body)
-            console.log(action)
+            //console.log(action)
             if(action.action === "Like") {
                 await Post.findOneAndUpdate({_id: action.to}, {$inc: {like: 1}})
             }
