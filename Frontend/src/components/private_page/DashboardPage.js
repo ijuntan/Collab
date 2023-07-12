@@ -12,12 +12,16 @@ import {
     MdThumbDownOffAlt as Dislike,
     MdFilterList as Filter,
     MdAccountCircle as Account,
-    MdShare as Share
+    MdShare as Share,
+    MdChat
 }
 from 'react-icons/md'
 import Sidebar from './Sidebar'
+import UserService from '../../services/userService'
 import PostService from '../../services/postService'
 import AddPost from './AddPost'
+import UserProfile from './UserProfile'
+import Chatbox from './Chatbox'
 
 const sortCat = [
     "Hot",
@@ -34,6 +38,8 @@ const categoryList = [
 
 const DashboardPage = () => {
     const { user, searchContent } = useOutletContext();
+    const [ searchFriend, setSearchFriend ] = useState("") 
+    const [ friendFound, setFriendFound ] = useState(null)
     const [posts, setPosts] = useState([])
     const [action, setAction] = useState([])
     const [sort, setSort] = useState("")
@@ -41,6 +47,8 @@ const DashboardPage = () => {
     const [openCreatePostDialog, setOpenCreatePostDialog] = useState(false)
     const [openLFT, setOpenLFT] = useState(false)
     const [openLFM, setOpenLFM] = useState(false)
+    const [openFriend, setOpenFriend] = useState(false)
+    const [chatTo, setChatTo] = useState(null)
 
     const history = useNavigate()
 
@@ -87,6 +95,19 @@ const DashboardPage = () => {
             fetchAction(user._id)
         }
     }, [posts])
+
+    const findFriend = async() => {
+        try {
+            const friend = await UserService.getUserByName(searchFriend)
+            if(friend.data.username !== user.username) {
+                if(friend) setOpenFriend(true)
+                setFriendFound(friend.data)
+            }
+            
+        } catch (err) {
+            console.log(err)
+        }
+    }
 
     const updateAction = (postId, act, beforeAct) => {
         const newActionState = action.map(obj => 
@@ -314,7 +335,7 @@ const DashboardPage = () => {
                         posts.map(item => (
                             // Post Card
                             <div
-                                key={item.name}
+                                key={item._id}
                                 className=" 
                                     flex flex-col rounded-lg
                                     shadow-md shadow-slate-400 divide-y
@@ -410,10 +431,67 @@ const DashboardPage = () => {
                     }
                 </div>
                 
-                {/* Menus */}
-                <div className="grow border">
-                    <div className="flex justify-center h-40 pt-4 text-white rounded-lg bg-amber-700">
-                        Notification
+                {/* Friend System */}
+                <div className="flex flex-col gap-4 grow">
+                    <div className="p-4 rounded-lg bg-amber-700">
+                        {/* Search Bar */}
+                        <input
+                            className="
+                                bg-amber-800 
+                                outline-none rounded-lg 
+                                p-2 pr-10 w-full
+                                text-white placeholder-amber-400
+                                focus:border
+                            "
+                            value={searchFriend}
+                            placeholder="Search Friends.."
+                            onChange = {e => setSearchFriend(e.target.value)}
+                            onKeyDown= {e => e.key==="Enter" && findFriend(friendFound)}
+                        />
+                        {/* User Profile Dialog */}
+                        {
+                            openFriend && 
+                            <UserProfile
+                                account={user}
+                                user={friendFound}
+                                open={openFriend}
+                                setOpen={setOpenFriend}
+                                setChatTo={setChatTo}
+                            />
+                        }
+                    </div>
+
+                    {/* Friend List */}
+                    <div className="flex flex-col h-80 p-4 text-white rounded-lg bg-amber-700">
+                        <div className="text-xl mb-4">
+                            Following List
+                        </div>
+                        {   user.follows?.length>0 &&
+                            user.follows.map(item => (
+                                <div key={item._id} className="flex text-white">
+                                    <button className='flex items-center gap-2'>
+                                        <Account/>
+                                        {item.username}
+                                    </button>
+                                    
+                                    <div className="flex justify-end grow">
+                                        <button onClick={()=> setChatTo(item)}>
+                                            <MdChat/>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        }
+                        {
+                            chatTo &&
+                            <Chatbox
+                                open={chatTo ? true : false}
+                                account={user}
+                                user={chatTo}
+                                setChatTo={setChatTo}
+                            />
+                        }
+                        
                     </div>
                 </div>
             </div>
@@ -430,78 +508,6 @@ const DashboardPage = () => {
                 setPost={setPost}
                 categoryList={categoryList}
             />
-
-            {/* <div className="flex flex-col p-8 gap-8">
-                {
-                    posts.map((item, index) => (
-                        <div className="flex gap-2 -ml-10" key={index}>
-                            <div className="flex flex-col justify-end">
-                                <div className="flex justify-center mb-4 font-bold">
-                                    {item.like}
-                                </div>
-
-                                <button title="Like post"
-                                    className={`
-                                        text-3xl 
-                                        ${inAction(item._id, "Like")?'text-green-600':'text-amber-700'}
-                                        hover:-translate-x-2
-                                    `}
-                                    onClick={() => actionPost(item._id, "Like")}
-                                >
-                                    <Like/>
-                                </button>
-                                
-                                <button title="Dislike post" 
-                                    className={`
-                                        text-3xl 
-                                        ${inAction(item._id, "Dislike")?'text-red-600':'text-amber-700'}
-                                        hover:-translate-x-2
-                                    `}
-                                    onClick={() => actionPost(item._id, "Dislike")}
-                                >
-                                    <Dislike/>
-                                </button>
-                            </div>
-                            <button
-                                className="flex flex-col bg-amber-200 w-post h-post rounded-lg text-white"
-                                onClick={() => history(`post/${item._id}`)}
-                            >
-                                <div className="flex items-center bg-amber-500 p-4 rounded-lg w-full text-left">
-                                    <div>
-                                        {item.name}
-                                    </div>
-                                    <div className="flex justify-end gap-2 grow">
-                                        {item.category.map((item, index) => (
-                                            <div className="bg-amber-700 rounded-md px-2 py-0.5" key={index}>
-                                                {item}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <textarea disabled className="flex hover:cursor-pointer flex-wrap p-4 text-black w-full h-full overflow-hidden"
-                                    value={item.content}
-                                />
-                            </button>
-                        </div>
-                    ))
-                }
-            </div>
-            
-            <div className="flex flex-col gap-8 fixed right-16 top-24 p-4">
-                <button className="bg-amber-700 rounded-lg px-4 py-2 drop-shadow-xl">
-                    <div className="hover:-translate-y-0.5 hover:font-bold duration-150 ease-linear text-white">
-                        MY POSTS
-                    </div>
-                </button>
-                <button className="bg-amber-700 rounded-lg px-4 py-2 drop-shadow-xl"
-                    onClick={addPost}
-                >
-                    <div className="hover:-translate-y-0.5 hover:font-bold duration-150 ease-linear text-white">
-                        ADD POST
-                    </div>
-                </button>
-            </div> */}
 
             <div className="grow"/>
         </>

@@ -162,7 +162,7 @@ const PostScreen = () => {
         else text= diff + " Days Ago"
 
         return(
-            <div className='text-slate-700 text-xs mt-1'>
+            <div className='text-slate-500 text-xs mt-1'>
                 {text}
             </div>
         )
@@ -256,7 +256,7 @@ const PostScreen = () => {
                             font-medium text-lg
                         "
                     >
-                        {post.name}
+                        {post.post}
                     </div>
 
                     <div className={
@@ -411,7 +411,7 @@ const PostScreen = () => {
                                             {dateDiff(obj.createdAt)}
                                         </div>
 
-                                        <div>
+                                        <div className="whitespace-pre-wrap">
                                             {obj.content}
                                         </div>
 

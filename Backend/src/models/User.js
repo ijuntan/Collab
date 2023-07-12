@@ -39,6 +39,16 @@ const UserSchema = new Schema({
         //ref: "Comment",
         required: false
     },
+    follows: {
+        type: [Types.ObjectId],
+        ref: "User",
+        required: false
+    },
+    followed: {
+        type: [Types.ObjectId],
+        ref: "User",
+        required: false
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date
 }, {

@@ -12,10 +12,38 @@ function jwtSignUser(user) {
 }
 
 module.exports = {
+    async followUser(req, res) {
+        try {
+            const {selfName, friendName} = req.body
+            const self = await User.findOneAndUpdate({_id: selfName}, {$push: {follows: friendName}})
+            const friend = await User.findOneAndUpdate({_id: friendName}, {$push: {followed: selfName}})
+
+            Promise.all([self, friend]).then(() => {
+                return res.status(200).send({msg: 'Success'})
+            })
+        }
+        catch(err) {
+            return res.status(500).send({error: "Get Error"})
+        }
+    },
+    async unfollowUser(req, res) {
+        try {
+            const {selfName, friendName} = req.body
+            const self = await User.findOneAndUpdate({_id: selfName}, {$pull: {follows: friendName}})
+            const friend = await User.findOneAndUpdate({_id: friendName}, {$pull: {followed: selfName}})
+
+            Promise.all([self, friend]).then(() => {
+                return res.status(200).send({msg: 'Success'})
+            })
+        }
+        catch(err) {
+            return res.status(500).send({error: "Get Error"})
+        }
+    },
     async getUserByName(req, res) {
         try {
             const {name} = req.params
-            const user = await User.findOne({username: name}).select("-password")
+            const user = await User.findOne({username: name}).select("-password").populate("follows")
 
             return res.status(200).send(user)
         }
@@ -23,6 +51,19 @@ module.exports = {
             return res.status(500).send({error: "Get Error"})
         }
     },
+
+    async getUsersByName(req, res) {
+        try {
+            const {name} = req.params
+            const users = await User.find({username: name}).select("-password")
+
+            return res.status(200).send(users)
+        }
+        catch(err) {
+            return res.status(500).send({error: "Get Error"})
+        }
+    },
+
     findByID: (req, res) => {
         const {user} = req;
         if(!user) {

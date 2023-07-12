@@ -23,6 +23,10 @@ const PostSchema = new Schema({
         type: Number,
         required: true
     },
+    dislike: {
+        type: Number,
+        required: true
+    },
     comment: {
         type: [Types.ObjectId],
         ref:'Comment',

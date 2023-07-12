@@ -11,7 +11,9 @@ mongoose.set('strictQuery', true);
 const app = express();
 
 //todo: adding whitelist
-app.use(cors());
+app.use(cors({
+    origin:"http://localhost:3000"
+}));
 require('./services/passport')
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: true}));
