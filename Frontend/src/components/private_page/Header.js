@@ -76,7 +76,9 @@ const Header = ({
                         flex items-center h-full
                         text-amber-400 px-4
                         hover:bg-amber-800/75
-                    ">
+                    "
+                        onClick={()=>history('project')}
+                    >
                         Projects
                         <Down/>
                     </button>

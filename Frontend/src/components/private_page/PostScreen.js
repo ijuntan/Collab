@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useOutletContext, useNavigate, useLocation } from 'react-router-dom'
 import PostService from '../../services/postService'
+import CommentService from '../../services/commentService'
 import { 
     MdOutlineLocalFireDepartment as Fire,
     MdOutlineTimelapse as Time,
@@ -9,6 +10,8 @@ import {
     MdKeyboardArrowLeft as Left,
     MdAccountCircle as Account,
     MdReply as Reply,
+    MdDelete,
+    MdEdit,
 }
 from 'react-icons/md'
 
@@ -17,16 +20,102 @@ const sortCat = [
     "Newest",
 ]
 
+const dateDiff = (createdAt) => {
+    const now = new Date()
+    const postDate = new Date(createdAt)
+    const diff = Math.floor((now - postDate)/ (1000 * 3600 * 24))
+    let text = ""
+
+    if(diff < 1) text="Today"
+    else if(diff > 30) text= Math.floor(diff/30) + " Months Ago"
+    else text= diff + " Days Ago"
+
+    return(
+        <div className='text-slate-500 text-xs mt-1'>
+            {text}
+        </div>
+    )
+}
+
+const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteComment}) => {
+    const parentComment = comment.filter(item => item.parent === parentId)
+    return(
+        <div className='flex flex-col gap-2'>
+        {
+            parentComment.map(parent => (
+                <div
+                    key={parent._id}
+                    className="
+                        flex flex-col bg-white p-2 rounded-lg gap-2 
+                        border border-slate-800
+                    "
+                >
+                    <div  
+                        className="
+                        flex items-center bg-white rounded-lg gap-2
+                        "
+                    >
+                        <Account/>
+                        {parent.createdBy.username} 
+                        {dateDiff(parent.createdAt)}
+                        {
+                            parent?.createdBy._id === user._id &&
+                            <div className='flex grow justify-end'>
+                                <button 
+                                    onClick={()=>deleteComment(parent._id)}
+                                >
+                                    <MdDelete className='hover:text-red-400 text-xl text-black'/>
+                                </button>
+                            </div>
+                        }
+                    </div>
+
+                    <div>
+                        {parent.content}
+                    </div>
+
+                    <div className="flex gap-2 border-t-1">
+                            <button className={`
+                                text-xl p-2 rounded-lg hover:bg-slate-300
+                                ${inAction(parent._id, "Like")?'text-green-600':'text-black'}
+                            `}
+                            //onClick={() => actionPost(parent._id, "Like")}
+                            
+                            >
+                                <Like/>
+                            </button>
+
+                            <button className={`
+                                text-xl p-2 rounded-lg hover:bg-slate-300
+                                ${inAction(parent._id, "Dislike")?'text-red-600':'text-black'}
+                            `}
+                            //onClick={() => actionPost(parent._id, "Dislike")}
+                            >
+                                <Dislike/>
+                            </button>
+
+                            <ReplyButton parentComment={parent}/>
+                    </div>
+
+                    <CommentReply 
+                    comment={comment.filter(item => item.root === parent.root)} 
+                    parentId={parent._id} 
+                    ReplyButton={ReplyButton} 
+                    inAction={inAction}
+                    user={user} 
+                    deleteComment={deleteComment}
+                    />
+                </div>
+            ))
+        }
+        </div>
+    )
+}
+
 const PostScreen = () => {
     const { user } = useOutletContext()
-    const [post, setPost] = useState({
-        name: "",
-        content: "",
-        category: [],
-        comment: [],
-        like: 0,
-        createdBy: ""
-    })
+    const [post, setPost] = useState(null)
+    const [comment, setComment] = useState(null)
     const [action, setAction] = useState([])
     const [sort, setSort] = useState("")
     const [content, setContent] = useState("")
@@ -41,18 +130,21 @@ const PostScreen = () => {
         );
         setAction(newActionState)
         
-        let inc = 0;
+        let linc = 0, dinc = 0;
         if(beforeAct === "Like") {
-            inc = act === "Dislike" ? -2 : -1
+            linc = -1
+            dinc = act === "Dislike" ? 1 : 0
         }
         else if(beforeAct === "Dislike") {
-            inc = act === "Like" ? 2 : 1
+            dinc = -1
+            linc = act === "Like" ? 1 : 0
         }
         else {
-            inc = act === "Like" ? 1 : -1
-        }
+            linc = act === "Like" ? 1 : 0
+            dinc = act === "Dislike" ? 1 : 0
+        } 
 
-        const newPostState = {...post, like: post.like + inc}
+        const newPostState = {...post, like: post.like + linc, dislike: post.dislike + dinc}
 
         setPost(newPostState)
     }
@@ -103,12 +195,21 @@ const PostScreen = () => {
         return action.some(e => e.to === id && e.action === act)
     }
 
-    const handlePost = async() => {
+    const fetchPost = async() => {
         try {
             const promise = await PostService.getPostById(pathname.split('/')[3])
             setPost(promise.data)
         } catch(err) {
-            console.log(err.data.error)
+            console.log(err.data.response.error)
+        }
+    }
+
+    const fetchComment = async() => {
+        try {
+            const promise = await CommentService.getComment(pathname.split('/')[3])
+            setComment(promise.data)
+        } catch(err) {
+            console.log(err.data.response.error)
         }
     }
 
@@ -117,58 +218,75 @@ const PostScreen = () => {
             const postcomment = {
                 content: content,
                 like: 0,
-                to: post._id,
-                comment: [],
-                repliedTo: "Post",
+                dislike: 0,
+                postId: post._id,
+                root:null,
+                parent: null,
                 createdBy: user._id
             }
-            const promise = await PostService.createComment(postcomment)
+            const promise = await CommentService.createComment(postcomment)
             if(promise) {
                 setContent("")
-                handlePost()
+                fetchComment()
             }
         } catch(err) {
             console.log(err)
         }
     }
 
-    const saveCommentToComment = async(commentID, commentContent) => {
+    const saveCommentToComment = async(parentComment, commentContent, setCommentContent, setShowForm) => {
         try {
             const postcomment = {
                 content: commentContent,
                 like: 0,
-                to: commentID,
-                comment: [],
-                repliedTo: "Comment",
+                dislike: 0,
+                postId: post._id,
+                root: parentComment.parent? parentComment.root: parentComment._id,
+                parent: parentComment._id,
                 createdBy: user._id
             }
-            const promise = await PostService.createComment(postcomment)
+            const promise = await CommentService.createComment(postcomment)
             if(promise) {
-                handlePost()
+                setCommentContent("")
+                setShowForm(false)
+                fetchComment()
             }
         } catch(err) {
             console.log(err)
         }
     }
 
-    const dateDiff = (createdAt) => {
-        const now = new Date()
-        const postDate = new Date(createdAt)
-        const diff = Math.floor((now - postDate)/ (1000 * 3600 * 24))
-        let text = ""
-
-        if(diff < 1) text="Today"
-        else if(diff > 30) text= Math.floor(diff/30) + " Months Ago"
-        else text= diff + " Days Ago"
-
-        return(
-            <div className='text-slate-500 text-xs mt-1'>
-                {text}
-            </div>
-        )
+    const deletePost = async() => {
+        try {
+            const success = await PostService.deletePost(post._id)
+            if(success) history('/dash')
+        }
+        catch(err) {
+            console.log(err)
+        }
     }
 
-    const ReplyButton = ({commentID}) => {
+    const deleteComment = async(id) => {
+        try {
+            const success = await CommentService.deleteComment(id)
+            if(success) fetchComment()
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
+
+    const editPost = async() => {
+        try {
+            // const success = await PostService.updatePost(post._id, )
+            // if(success) history('/dash')
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
+
+    const ReplyButton = ({parentComment}) => {
         const [showForm, setShowForm] = useState(false)
         const [commentContent, setCommentContent] = useState("")
         return(
@@ -195,7 +313,7 @@ const PostScreen = () => {
                     onChange = {e => setCommentContent(e.target.value)}
                 />
                 <button className='text-sm p-2 border rounded-lg'
-                    onClick={()=>saveCommentToComment(commentID, commentContent)}
+                    onClick={()=>saveCommentToComment(parentComment, commentContent, setCommentContent, setShowForm)}
                 >
                     submit
                 </button>
@@ -206,7 +324,8 @@ const PostScreen = () => {
     }
 
     useEffect(() => {
-        handlePost()
+        fetchPost()
+        fetchComment()
     }, [])
 
     useEffect(() => {
@@ -219,6 +338,8 @@ const PostScreen = () => {
             fetchAction(user._id)
         }
     }, [post])
+
+    const parentComment = useMemo(()=> comment?.filter(item => item.parent === null),[comment])
 
     return (
         <>
@@ -243,8 +364,24 @@ const PostScreen = () => {
                     <div className="text-3xl">
                         <Account/>
                     </div>
-                    {post.createdBy.username}
-                    {dateDiff(post.createdAt)}
+                    {post?.createdBy.username}
+                    {dateDiff(post?.createdAt)}
+                    
+                    {
+                        post?.createdBy._id === user._id &&
+                        <div className='flex grow gap-2 justify-end'>
+                            <button 
+                                onClick={editPost}
+                            >
+                                <MdEdit className='hover:text-green-400 text-xl'/>
+                            </button>
+                            <button 
+                                onClick={deletePost}
+                            >
+                                <MdDelete className='hover:text-red-400 text-xl'/>
+                            </button>
+                        </div>
+                    }
                 </div>
                 
                 <div className="
@@ -256,43 +393,48 @@ const PostScreen = () => {
                             font-medium text-lg
                         "
                     >
-                        {post.post}
+                        {post?.name}
                     </div>
 
                     <div className={
-                        `${!(post.tag === "question") && "hidden"}
+                        `${!(post?.tag !== "normal") && "hidden"}
                             text-cream-200 border border-cream-200 px-2
                             rounded-lg
                         `
                     }
                     >
-                        Question
+                        {post?.tag}
                     </div>
                 </div>
             </div>
 
             <div className='flex flex-col gap-4 rounded-lg bg-amber-200 text-slate-800 p-4 drop-shadow-lg whitespace-pre-line'>
-                {post.content}
+                {post?.content}
 
-                <div className='flex gap-2'>
+                <div className='flex items-center gap-2'>
                     <button className={`
                         text-xl p-2 rounded-lg hover:bg-cream-500
-                        ${inAction(post._id, "Like")?'text-green-600':'text-black'}
+                        ${inAction(post?._id, "Like")?'text-green-600':'text-black'}
                     `}
-                    onClick={() => actionPost(post._id, "Like")}
+                    onClick={() => actionPost(post?._id, "Like")}
                     
                     >
                         <Like/>
                     </button>
-
+                    <div>
+                        {post?.like}
+                    </div>
                     <button className={`
                         text-xl p-2 rounded-lg hover:bg-cream-500
-                        ${inAction(post._id, "Dislike")?'text-red-600':'text-black'}
+                        ${inAction(post?._id, "Dislike")?'text-red-600':'text-black'}
                     `}
-                    onClick={() => actionPost(post._id, "Dislike")}
+                    onClick={() => actionPost(post?._id, "Dislike")}
                     >
                         <Dislike/>
                     </button>
+                    <div>
+                        {post?.dislike}
+                    </div>
                 </div>
             </div>
 
@@ -345,11 +487,10 @@ const PostScreen = () => {
 
             <div className="flex flex-col gap-4">
                 <div className="border border-1 border-slate-700"/>
-
                 {
-                    post.comment.map((item, index) => (
+                    parentComment?.map(parent => (
                         <div
-                            key={index}
+                            key={parent._id}
                             className="
                                 flex flex-col bg-white p-2 rounded-lg gap-2 
                                 border border-slate-800
@@ -361,20 +502,31 @@ const PostScreen = () => {
                                 "
                             >
                                 <Account/>
-                                {item.createdBy.username} 
-                                {dateDiff(item.createdAt)}
+                                {parent.createdBy.username} 
+                                {dateDiff(parent.createdAt)}
+
+                                {
+                                    parent?.createdBy._id === user._id &&
+                                    <div className='flex grow justify-end'>
+                                        <button 
+                                            onClick={()=>deleteComment(parent._id)}
+                                        >
+                                            <MdDelete className='hover:text-red-400 text-xl text-black'/>
+                                        </button>
+                                    </div>
+                                }
                             </div>
 
                             <div>
-                                {item.content}
+                                {parent.content}
                             </div>
 
                             <div className="flex gap-2 border-t-1">
                                     <button className={`
                                         text-xl p-2 rounded-lg hover:bg-slate-300
-                                        ${inAction(item._id, "Like")?'text-green-600':'text-black'}
+                                        ${inAction(parent._id, "Like")?'text-green-600':'text-black'}
                                     `}
-                                    onClick={() => actionPost(item._id, "Like")}
+                                    //onClick={() => actionPost(parent._id, "Like")}
                                     
                                     >
                                         <Like/>
@@ -382,65 +534,24 @@ const PostScreen = () => {
 
                                     <button className={`
                                         text-xl p-2 rounded-lg hover:bg-slate-300
-                                        ${inAction(item._id, "Dislike")?'text-red-600':'text-black'}
+                                        ${inAction(parent._id, "Dislike")?'text-red-600':'text-black'}
                                     `}
-                                    onClick={() => actionPost(item._id, "Dislike")}
+                                    //onClick={() => actionPost(parent._id, "Dislike")}
                                     >
                                         <Dislike/>
                                     </button>
 
-                                    <ReplyButton commentID={item._id}/>
+                                    <ReplyButton parentComment={parent}/>
                             </div>
 
-                            {
-                            item.comment.map((obj, itndex) => (
-                                <div key={itndex} >
-                                    <div
-                                        className="
-                                            flex flex-col bg-white p-2 rounded-lg gap-2 
-                                            border border-slate-800
-                                        "
-                                    >
-                                        <div  
-                                            className="
-                                            flex items-center bg-white rounded-lg gap-2
-                                            "
-                                        >
-                                            <Account/>
-                                            {obj.createdBy.username} 
-                                            {dateDiff(obj.createdAt)}
-                                        </div>
-
-                                        <div className="whitespace-pre-wrap">
-                                            {obj.content}
-                                        </div>
-
-                                        <div className="flex gap-2 border-t-1">
-                                            <button className={`
-                                                text-xl p-2 rounded-lg hover:bg-slate-300
-                                                ${inAction(obj._id, "Like")?'text-green-600':'text-black'}
-                                            `}
-                                            onClick={() => actionPost(obj._id, "Like")}
-                                            
-                                            >
-                                                <Like/>
-                                            </button>
-
-                                            <button className={`
-                                                text-xl p-2 rounded-lg hover:bg-slate-300
-                                                ${inAction(obj._id, "Dislike")?'text-red-600':'text-black'}
-                                            `}
-                                            onClick={() => actionPost(obj._id, "Dislike")}
-                                            >
-                                                <Dislike/>
-                                            </button>
-
-                                            <ReplyButton commentID={obj._id}/>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                            }
+                            <CommentReply 
+                            comment={comment.filter(item => item.root === parent._id)} 
+                            parentId={parent._id} 
+                            ReplyButton={ReplyButton} 
+                            inAction={inAction} 
+                            user={user} 
+                            deleteComment={deleteComment}
+                            />
                         </div>
                     ))
                 }

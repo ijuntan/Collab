@@ -1,14 +1,11 @@
 const passport = require('passport')
 const Joi = require('joi')
-const multer = require('multer')
-
-const multerStorage = multer.memoryStorage();
 
 module.exports = {
-    upload: multer({ storage: multerStorage}),
     isAuthenticated: (req, res, next) => {
         passport.authenticate('jwt', (err, user) => {
             if(err || !user) {
+                //localStorage.removeItem('token')
                 res.status(403).send({
                     error: 'No pass'
                 })

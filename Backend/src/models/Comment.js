@@ -11,21 +11,24 @@ const CommentSchema = new Schema({
         type: Number,
         required: true
     },
-    to: {
+    dislike: {
+        type: Number,
+        required: true
+    },
+    root: {
         type: Types.ObjectId,
-        refPath: "repliedTo",
+        refPath: "Comment",
+        required: false,
+    },
+    parent: {
+        type: Types.ObjectId,
+        refPath: "Comment",
+        required: false,
+    },
+    postId: {
+        type: Types.ObjectId,
+        refPath: "Post",
         required:true,
-        
-    },
-    repliedTo: {
-        type: String,
-        enum: ['Post', 'Comment'],
-        required: true,
-    },
-    comment: {
-        type: [Types.ObjectId],
-        ref:"Comment",
-        required: false
     },
     createdBy: {
         type: Types.ObjectId,
