@@ -9,8 +9,8 @@ import {
     MdGroup as Group,
     MdImage as Image
 } from 'react-icons/md'
-
 import PostService from '../../services/postService'
+import ProjectService from '../../services/projectService'
 
 const personCategoryList = [
     {
@@ -85,6 +85,7 @@ const AddPost = ({
     )
 
     const [category, setCategory] = useState([])
+    const [userProject, setUserProject] = useState(null)
 
     const history = useNavigate()
 
@@ -128,19 +129,79 @@ const AddPost = ({
     }
 
     const createPost = async() => {
-        const post_final = {
-            name: post.name,
-            content: post.desc,
-            category: category,
-            like: 0,
-            tag: post.tagQuestion ? "question":"",
-            image: imageURL,
-            createdBy: user._id
+        try {
+            const post_final = {
+                name: post.name,
+                content: post.desc,
+                category: category,
+                like: 0,
+                dislike: 0,
+                tag: post.tagQuestion ? "question":"normal",
+                image: imageURL,
+                createdBy: user._id
+            }
+            const success = await PostService.createPost(post_final)
+            if(success) {
+                setOpen(false)
+                history("/dash")
+            }
         }
-        console.log(post_final)
-        await PostService.createPost(post_final)
-        setOpen(false)
-        history("/dash")
+        catch(err) {
+            console.log(err)
+            alert(err?.response?.data?.error)
+        }
+    }
+
+    const createPostLFT = async() => {
+        try {
+            const post_final = {
+                name: 
+                `Looking for ${postLFT.teamCat.join(", ")} team`,
+                content:
+                `${postLFT.desc}\nHere's my experience:\n${postLFT.exp}`,
+                category: category,
+                like: 0,
+                dislike: 0,
+                tag: "LFT",
+                image: null,
+                createdBy: user._id
+            }
+            const success = await PostService.createPost(post_final)
+            if(success) {
+                setOpenLFT(false)
+                history("/dash")
+            }
+        }
+        catch(err) {
+            console.log(err)
+            alert(err?.response?.data?.error)
+        }
+    }
+
+    const createPostLFM = async() => {
+        try {
+            const post_final = {
+                name: 
+                `Looking for ${postLFT.teamCat.join(", ")} team`,
+                content:
+                `${postLFT.desc}\nHere's my experience:\n${postLFT.exp}`,
+                category: category,
+                like: 0,
+                dislike: 0,
+                tag: "LFm",
+                image: null,
+                createdBy: user._id
+            }
+            const success = await PostService.createPost(post_final)
+            if(success) {
+                setOpenLFM(false)
+                history("/dash")
+            }
+        }
+        catch(err) {
+            console.log(err)
+            alert(err?.response?.data?.error)
+        }
     }
 
     const openLFMButton = () => {
@@ -162,6 +223,20 @@ const AddPost = ({
         setOpen(true)
         setOpenLFT(false)
     }
+
+    useEffect(() => {
+        const getUserProject = async() => {
+            try {
+                const promise = await ProjectService.getProject(user._id)
+                setUserProject(promise.data)
+            }
+            catch(err) {
+                alert(err?.response?.data?.error)
+            }
+        }
+
+        getUserProject()
+    }, [])
 
     return (
         <>
@@ -336,7 +411,7 @@ const AddPost = ({
 
                                 <div className="flex grow justify-end">
                                     <label 
-                                        for="image-input" 
+                                        htmlFor="image-input" 
                                         className="text-amber-700 text-2xl cursor-pointer" 
                                         title="Upload an Image"
                                     >
@@ -590,7 +665,7 @@ const AddPost = ({
                                         rounded-lg px-4 py-2 border border-amber-600
                                         hover:bg-amber-700 hover:border-amber-700
                                     "
-                                    onClick={()=>setOpenLFT(false)}
+                                    onClick={createPostLFT}
                                 >
                                 Post
                                 </button>
@@ -665,8 +740,8 @@ const AddPost = ({
                                         flex flex-col max-h-44 overflow-auto
                                         mt-1 bg-white rounded-lg p-2 border gap-2 w-full
                                     ">
-                                        {
-                                        user.projects.map((item, index) => (
+                                        { userProject &&
+                                        userProject.map((item, index) => (
                                             <Listbox.Option key={index} value={item}>
                                                 {({ selected }) => (
                                                     <button className=

@@ -1,7 +1,6 @@
 const router = require('express').Router()
-
+const multer = require('multer')
 const postController = require('../controllers/postController')
-const { upload } = require('../middleware')
 
 router.get('/', (req, res) => {
     res.send({
@@ -9,13 +8,35 @@ router.get('/', (req, res) => {
     })
 })
 
-router.get('/getpost', postController.getPost)
-router.get('/getpostbycategory/:category', postController.getPostByCategory)
-router.get('/getpostbysearch/:search', postController.getPostBySearch)
-router.get('/getpostbyid/:id', postController.getPostById)
-router.post('/createpost', upload.single('image'), postController.createPost)
-router.post('/createcomment', postController.createComment)
-router.post('/actiontopost', postController.actionToPost)
-router.put('/updateactionpost', postController.updateActionPost)
-router.get('/getactionbyuser/:id', postController.getActionUser)
+// const upload = multer({
+//     limits: {
+//       fileSize: 10 * 1024 * 1024 // 10MB file size limit
+//     },
+//     fileFilter: (req, file, cb) => {
+//       // Perform file type validation
+//       const allowedMimes = PredefinedDokumenCategory;
+//       if (allowedMimes.includes(file.mimetype)) {
+//         cb(null, true);
+//       } else {
+//         console.log("Get this file: ")
+//         console.log(file.mimetype)
+//         cb(new Error('Invalid file type.'));
+//       }
+//     },
+//     storage: multer.memoryStorage()
+// });
+
+router.get('/posts', postController.getPost)
+router.get('/posts/:category', postController.getPostByCategory)
+router.get('/search', postController.getPostBySearch)
+router.get('/:id', postController.getPostById)
+
+//router.post('/post', upload.single('image'), postController.createPost)
+router.post('/', postController.createPost)
+router.patch('/:id', postController.updatePost)
+router.delete('/:id', postController.deletePost)
+
+router.get('/action/:id', postController.getActionUser)
+router.post('/action', postController.actionToPost)
+router.put('/action', postController.updateActionPost)
 module.exports = router

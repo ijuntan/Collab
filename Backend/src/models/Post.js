@@ -2,6 +2,11 @@ const mongoose = require('mongoose')
 
 const { Schema, Types } = mongoose;
 
+const PredefinedDokumenCategory = [
+    "image/jpeg",  
+    "image/png", 
+]
+
 const PostSchema = new Schema({
     name: {
         type: String,
@@ -17,7 +22,7 @@ const PostSchema = new Schema({
     },
     tag: {
         type: String,
-        required: true
+        required: false
     },
     like: {
         type: Number,
@@ -27,14 +32,8 @@ const PostSchema = new Schema({
         type: Number,
         required: true
     },
-    comment: {
-        type: [Types.ObjectId],
-        ref:'Comment',
-        required: false
-    },
     image: {
-        data: Buffer,
-        contentType: String,
+        type: String,
         required: false,
     },
     createdBy: {

@@ -9,11 +9,6 @@ const UserSchema = new Schema({
         type: String,
         required: true,
         unique: true,
-        lowercase: true,
-        trim: true,
-        index: {
-            unique: true
-        }
     },
     email: {
         type: String,
@@ -23,21 +18,6 @@ const UserSchema = new Schema({
     password: {
         type: String,
         required: true,
-    },
-    posts: {
-        type: [Types.ObjectId],
-        ref: "Post",
-        required: false
-    },
-    comments: {
-        type: [Types.ObjectId],
-        ref: "Comment",
-        required: false
-    },
-    projects: {
-        type: [String],
-        //ref: "Comment",
-        required: false
     },
     follows: {
         type: [Types.ObjectId],

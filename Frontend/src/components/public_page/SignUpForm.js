@@ -13,6 +13,9 @@ const SignUpForm = (props) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const {jwt, setJwt} = useContext(MainContext)
+
+    const [error, setError] = useState('')
+
     const history = useNavigate()
   
     const handleChange = (e) => {
@@ -34,19 +37,17 @@ const SignUpForm = (props) => {
   
     const handleSubmit = async (e) => {
         e.preventDefault()
-        alert(username)
         try {
-            const user = {
-                username,
-                email,
-                password
-            }
-            const response = await AuthService.signup(user)
-            //alertToggleSuccess()
+          const user = {
+              username,
+              email,
+              password
+          }
+          const success = await AuthService.signup(user)
+          if(success) props.setShowLogin(true)
         }
         catch(error) {
-            console.log('err: ', error.response.data.error)
-            //alertToggleError(error.response.data.error)
+          setError(error?.response?.data?.error)
         }
         
     }
@@ -56,10 +57,6 @@ const SignUpForm = (props) => {
             return history('/dash')
         }
     }, [jwt, history, setJwt])
-  
-    useEffect(() => {
-        console.log(username)
-    }, [username])
 
     return(
       <Transition show={props.showForm}>
@@ -193,14 +190,21 @@ const SignUpForm = (props) => {
                     </label>
                   </div>
                 </div>
-  
+                
                 <button 
-                    className="w-full bg-amber-700 rounded-md mt-10 mb-4 py-2 font-bold text-white"
+                    className="w-full bg-amber-700 rounded-md mt-8 mb-2 py-2 font-bold text-white"
                     onClick = {e => handleSubmit(e)}
                 >
                   Sign up
                 </button>
-  
+
+                {
+                  error !== "" &&
+                  <div className="text-red-700">
+                    {error}
+                  </div>
+                }
+
                 <div className="flex gap-1">
                   Already have an account?
                   <button className="text-cream-300" onClick = {e => props.setShowLogin(true)}>

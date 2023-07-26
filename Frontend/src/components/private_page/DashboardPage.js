@@ -16,7 +16,6 @@ import {
     MdChat
 }
 from 'react-icons/md'
-import Sidebar from './Sidebar'
 import UserService from '../../services/userService'
 import PostService from '../../services/postService'
 import AddPost from './AddPost'
@@ -40,8 +39,8 @@ const DashboardPage = () => {
     const { user, searchContent } = useOutletContext();
     const [ searchFriend, setSearchFriend ] = useState("") 
     const [ friendFound, setFriendFound ] = useState(null)
-    const [posts, setPosts] = useState([])
-    const [action, setAction] = useState([])
+    const [posts, setPosts] = useState(null)
+    const [action, setAction] = useState(null)
     const [sort, setSort] = useState("")
     const [filterCategory, setFilterCategory] = useState("")
     const [openCreatePostDialog, setOpenCreatePostDialog] = useState(false)
@@ -60,22 +59,28 @@ const DashboardPage = () => {
         }
     )
 
-    useEffect(() => {
-        const fetchPost = async() => {
-            const promise = await PostService.getPost()
-            setPosts(promise.data)
-        }
-    
-        const fetchPostByCategory = async() => {
-            const promise = await PostService.getPostByCategory(filterCategory)
-            setPosts(promise.data)
-        }
-    
-        const fetchPostBySearch = async() => {
-            const promise = await PostService.getPostBySearch(searchContent)
-            setPosts(promise.data)
-        }
+    const fetchPost = async() => {
+        const promise = await PostService.getPost()
+        setPosts(promise.data)
+    }
 
+    const fetchPostByCategory = async() => {
+        const promise = await PostService.getPostByCategory(filterCategory)
+        setPosts(promise.data)
+    }
+
+    const fetchPostBySearch = async() => {
+        try {
+            const promise = await PostService.getPostBySearch(searchContent)
+            console.log(promise.data)
+            setPosts(promise.data)
+        }
+        catch(err){
+            setPosts([]) 
+        }
+    }
+
+    useEffect(() => {
         if(searchContent === "") {
             if(filterCategory === "")
                 fetchPost()
@@ -117,19 +122,22 @@ const DashboardPage = () => {
         );
         setAction(newActionState)
         
-        let inc = 0;
+        let linc = 0, dinc = 0;
         if(beforeAct === "Like") {
-            inc = act === "Dislike" ? -2 : -1
+            linc = -1
+            dinc = act === "Dislike" ? 1 : 0
         }
         else if(beforeAct === "Dislike") {
-            inc = act === "Like" ? 2 : 1
+            dinc = -1
+            linc = act === "Like" ? 1 : 0
         }
         else {
-            inc = act === "Like" ? 1 : -1
+            linc = act === "Like" ? 1 : 0
+            dinc = act === "Dislike" ? 1 : 0
         } 
         const newPostState = posts.map(obj => 
             obj._id === postId
-            ? {...obj, like: obj.like + inc}
+            ? {...obj, like: obj.like + linc, dislike: obj.dislike + dinc}
             : obj
         );
 
@@ -202,7 +210,7 @@ const DashboardPage = () => {
     return (
         <>
             <div className="grow"/>
-
+            
             {/* Main Screen */}
             <div className="flex grow py-4 gap-6">
                 <div className="flex flex-col grow-[2] gap-4">
@@ -331,7 +339,7 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Post  */}
-                    {
+                    {   posts &&
                         posts.map(item => (
                             // Post Card
                             <div
@@ -372,13 +380,13 @@ const DashboardPage = () => {
                                         </button>
 
                                         <div className={
-                                            `${!(item.tag === "question") && "hidden"}
+                                            `${!(item.tag !== "normal") && "hidden"}
                                                 text-cream-200 border border-cream-200 px-2
                                                 rounded-lg
                                             `
                                         }
                                         >
-                                            Question
+                                            {item.tag.toUpperCase()}
                                         </div>
                                     </div>
                                 </div>
@@ -409,6 +417,10 @@ const DashboardPage = () => {
                                         <Like/>
                                     </button>
 
+                                    <div>
+                                        {item.like}
+                                    </div>
+
                                     <button className={`
                                         text-2xl p-2 rounded-lg hover:bg-slate-300
                                         ${inAction(item._id, "Dislike")?'text-red-600':'text-black'}
@@ -417,6 +429,10 @@ const DashboardPage = () => {
                                     >
                                         <Dislike/>
                                     </button>
+
+                                    <div>
+                                        {item.dislike}
+                                    </div>
 
                                     <button className={`
                                         text-2xl p-2 rounded-lg hover:bg-slate-300
@@ -507,8 +523,8 @@ const DashboardPage = () => {
                 post={post}
                 setPost={setPost}
                 categoryList={categoryList}
-            />
-
+            /> 
+            
             <div className="grow"/>
         </>
     )

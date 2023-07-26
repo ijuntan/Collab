@@ -12,6 +12,7 @@ const LoginForm = (props) => {
     
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [error, setError] = useState('')
     const {jwt, setJwt} = useContext(MainContext)
     const history = useNavigate()
 
@@ -46,7 +47,7 @@ const LoginForm = (props) => {
           history('/dash')
       }
       catch(error) {
-          //console.log('err: ', error.response.data.error)
+        setError(error?.response?.data?.error)
       }
         
     }
@@ -161,12 +162,19 @@ const LoginForm = (props) => {
                 </div>
   
                 <button 
-                    className="w-full bg-amber-700 rounded-md mt-10 mb-4 py-2 font-bold text-white"
+                    className="w-full bg-amber-700 rounded-md mt-10 mb-2 py-2 font-bold text-white"
                     onClick = {e => handleSubmit(e)}
                 >
                   Login
                 </button>
-  
+                
+                {
+                  error !== "" &&
+                  <div className="text-red-700">
+                    {error}
+                  </div>
+                }
+
                 <div className="flex gap-1">
                   Don't have an account?
                   <button className="text-cream-300" onClick = {e => props.setShowLogin(false)}>

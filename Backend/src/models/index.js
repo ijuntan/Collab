@@ -3,10 +3,12 @@ const Post = require('./Post');
 const Comment = require('./Comment')
 const Action = require('./Action')
 const Conversation = require('./Conversation')
+const Project = require('./Project')
 module.exports = {
     User,
     Post,
     Comment,
     Action,
-    Conversation
+    Conversation,
+    Project
 }

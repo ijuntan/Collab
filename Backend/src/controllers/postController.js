@@ -1,7 +1,4 @@
-const jwt = require('jsonwebtoken');
 const { Post, Comment, User, Action } = require('../models')
-const config = require('../config/config');
-const { post } = require('../routes');
 
 module.exports = {
     async getPost(req, res) {
@@ -11,54 +8,36 @@ module.exports = {
             //console.log(posts)
             res.status(200).json(posts)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
     async getPostByCategory(req, res) {
         try {
-            const {category} = req.params
-            const posts = await Post.aggregate([{$match: {category: category}}, {$sample: {size: 10}}])
-            
+            //const posts = await Post.aggregate([{$match: {category: category}}, {$sample: {size: 10}}])
+            const posts = await Post.find({category: req.query.search}).populate("createdBy", "username")
             res.status(200).json(posts)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
     async getPostBySearch(req, res) {
         try {
-            const {search} = req.params
-
-            const posts = await Post.aggregate([{$match: {name: {$regex: search, '$options': 'i'}}}])
-            
+            const posts = await Post.aggregate([{$match: {name: {$regex: req.query.s, '$options': 'i'}}}])
+            await User.populate(posts, {path: "createdBy", select:"username"});
             res.status(200).json(posts)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
     async getPostById(req, res) {
         try {
-            const {id} = req.params
-            const post = await Post.findById(id).populate("createdBy", "username")
-            const comments = await Comment.find({to: id}).populate("createdBy", "username").populate({path:"comment", populate:{path:"createdBy", select:"username"}})
-            const post_final = {
-                _id: post._id,
-                post: post.name,
-                content: post.content,
-                category: post.category,
-                tag: post.tag,
-                like: post.like,
-                comment: comments,
-                image: post.image,
-                createdBy: post.createdBy,
-                createdAt: post.createdAt
-            }
-            //console.log(post_final)
-            res.status(200).json(post_final)
+            const post = await Post.findById(req.params.id).populate("createdBy", "username")
+            res.status(200).json(post)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
@@ -67,36 +46,46 @@ module.exports = {
             const post = await Post.create(req.body)
             res.status(200).json(post)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
-    async createComment(req, res) {
+    async updatePost(req, res) {
         try {
-            const comment = await Comment.create(req.body)
-            if(comment.to === "Post")
-                await Post.findOneAndUpdate({_id: comment.to}, {$push: {comment: comment._id}})
-            else
-                await Comment.findOneAndUpdate({_id: comment.to}, {$push: {comment: comment._id}})
-            res.status(200).json(comment)
-        } catch(error) {
-            console.log(error)
+            const {id} = req.params
+            const res1 = await Post.findOneAndUpdate({_id: id}, {...req.body})
+            res.status(200).json(result)
+        }
+        catch(error) {
+            res.status(400).json(error)
         }
     },
 
+    async deletePost(req, res) {
+        try {
+            const {id} = req.params
+            const res1 = await Post.deleteOne({_id: id})
+            const res2 = await Comment.deleteMany({postId: id})
+            await Promise.all([res1, res2]).then((result)=>res.status(200).json(result))
+        }
+        catch(error) {
+            res.status(400).json(error)
+        }
+    },
+
+    //Action
     async actionToPost(req, res) {
         try {
             const action = await Action.create(req.body)
-            //console.log(action)
             if(action.action === "Like") {
                 await Post.findOneAndUpdate({_id: action.to}, {$inc: {like: 1}})
             }
             else {
-                await Post.findOneAndUpdate({_id: action.to}, {$inc: {like: -1}})
+                await Post.findOneAndUpdate({_id: action.to}, {$inc: {dislike: 1}})
             }
             res.status(200).json(action)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
@@ -107,7 +96,7 @@ module.exports = {
 
             res.status(200).json(actionList)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
     },
 
@@ -117,21 +106,21 @@ module.exports = {
             const result = await Action.findOneAndUpdate({accountID: userID, to: postID}, {action: act})
             if(result) {
                 if(beforeAct === "Like") {
-                    if(act === "Dislike") await Post.findOneAndUpdate({_id: postID}, {$inc: {like: -2}})
+                    if(act === "Dislike") await Post.findOneAndUpdate({_id: postID}, {$inc: {like: -1, dislike: 1}})
                     else await Post.findOneAndUpdate({_id: postID}, {$inc: {like: -1}})
                 }
                 else if(beforeAct === "Dislike") {
-                    if(act === "Like") await Post.findOneAndUpdate({_id: postID}, {$inc: {like: 2}})
-                    else await Post.findOneAndUpdate({_id: postID}, {$inc: {like: 1}})
+                    if(act === "Like") await Post.findOneAndUpdate({_id: postID}, {$inc: {like: 1, dislike: -1}})
+                    else await Post.findOneAndUpdate({_id: postID}, {$inc: {dislike: -1}})
                 }
                 else {
                     if(act === "Like") await Post.findOneAndUpdate({_id: postID}, {$inc: {like: 1}})
-                    else await Post.findOneAndUpdate({_id: postID}, {$inc: {like: -1}})
+                    else await Post.findOneAndUpdate({_id: postID}, {$inc: {dislike: 1}})
                 } 
             }
             res.status(200).json(result)
         } catch(error) {
-            console.log(error)
+            res.status(400).json(error)
         }
-    }
+    },
 }

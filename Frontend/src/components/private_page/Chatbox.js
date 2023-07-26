@@ -32,7 +32,7 @@ const Chatbox = ({
             const promise = await ChatService.postMessage(msg)
             if(promise) setConversation(prev => [...prev, {
                 sender: msg.sender,
-                message: msg.text,
+                message: msg.message,
                 time: Date.now()
             }])
         }
