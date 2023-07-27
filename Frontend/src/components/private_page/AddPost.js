@@ -14,19 +14,19 @@ import ProjectService from '../../services/projectService'
 
 const personCategoryList = [
     {
-        value: "dev",
+        value: "developer",
         placeholder: "Development",
     },
     {
-        value: "man",
+        value: "manager",
         placeholder: "Management",
     },
     {
-        value: "mar",
+        value: "marketing",
         placeholder: "Marketing",
     },
     {
-        value: "des",
+        value: "design",
         placeholder: "Design",
     },
     {
@@ -79,7 +79,6 @@ const AddPost = ({
         {
             project: "",
             personCat: [],
-            name: "",
             desc: "",
         }
     )
@@ -182,16 +181,17 @@ const AddPost = ({
         try {
             const post_final = {
                 name: 
-                `Looking for ${postLFT.teamCat.join(", ")} team`,
+                `Searching members for ${userProject.find(item => item._id === postLFM.project).name} project`,
                 content:
-                `${postLFT.desc}\nHere's my experience:\n${postLFT.exp}`,
-                category: category,
+                `We need the following people:\n${postLFM.personCat.join(`\n`)}\n\n${postLFM.desc}}`,
+                category: userProject.find(item => item._id === postLFM.project).category,
                 like: 0,
                 dislike: 0,
-                tag: "LFm",
+                tag: "LFM",
                 image: null,
                 createdBy: user._id
             }
+            console.log(post_final)
             const success = await PostService.createPost(post_final)
             if(success) {
                 setOpenLFM(false)
@@ -225,9 +225,9 @@ const AddPost = ({
     }
 
     useEffect(() => {
-        const getUserProject = async() => {
+        const fetchProject = async() => {
             try {
-                const promise = await ProjectService.getProject(user._id)
+                const promise = await ProjectService.getProjects(user._id)
                 setUserProject(promise.data)
             }
             catch(err) {
@@ -235,7 +235,7 @@ const AddPost = ({
             }
         }
 
-        getUserProject()
+        fetchProject()
     }, [])
 
     return (
@@ -742,14 +742,14 @@ const AddPost = ({
                                     ">
                                         { userProject &&
                                         userProject.map((item, index) => (
-                                            <Listbox.Option key={index} value={item}>
+                                            <Listbox.Option key={item._id} value={item._id}>
                                                 {({ selected }) => (
                                                     <button className=
                                                     {`rounded-lg px-2 py-1 w-full flex
                                                     ${selected && 'bg-slate-200'}
                                                     `}
                                                     >
-                                                        {item}
+                                                        {item.name}
                                                     </button>
                                                 )}
                                             </Listbox.Option>
@@ -761,7 +761,7 @@ const AddPost = ({
 
                             <div className={`${postLFM.project === "" && "hidden"} mt-2 flex gap-2`}>
                                 <div className="border border-amber-700 rounded-lg p-2">
-                                    Project name: {postLFM.project}
+                                    Project name: {postLFM.project && userProject.find(item => item._id === postLFM.project).name}
                                 </div>
                                 <button
                                     className='hover:text-red-500'
@@ -866,7 +866,7 @@ const AddPost = ({
                                         rounded-lg px-4 py-2 border border-amber-600
                                         hover:bg-amber-700 hover:border-amber-700
                                     "
-                                    onClick={()=>setOpenLFM(false)}
+                                    onClick={createPostLFM}
                                 >
                                 Post
                                 </button>
