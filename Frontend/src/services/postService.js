@@ -16,6 +16,9 @@ const PostService = {
             }
         })
     },
+    getPostByUser(id) {
+        return axios.get(`${API_URL}/user_posts/${id}`)
+    },
     getPostById(id) {
         return axios.get(`${API_URL}/${id}`)
     },
@@ -37,7 +40,7 @@ const PostService = {
     },
     updateActionPost(act) {
         return axios.put(`${API_URL}/action`, act)
-    }
+    },
 }
 
 export default PostService

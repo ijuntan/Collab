@@ -1,10 +1,6 @@
-import React, { useContext, useState, useEffect, Fragment } from 'react'
-import { MainContext } from '../../services/MainContext'
+import React, { useContext, useState } from 'react'
 import { UserContext } from '../../services/authComponent'
-import AuthService from '../../services/authService'
-import { Routes, Route, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { MdAccountCircle as Account, MdExpandMore as Down } from 'react-icons/md'
-import { Menu } from '@headlessui/react'
+import { Outlet} from 'react-router-dom'
 import Header from "./Header"
 
 const filterCategory = [
@@ -21,10 +17,10 @@ const PrivateScreen = () => {
     const [searchContent, setSearchContent] = useState("")
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col min-h-screen">
             <Header searchContent={searchContent} setSearchContent={setSearchContent}/> 
             
-            <div className="flex min-h-screen bg-cream-200 mt-20">
+            <div className="flex grow bg-cream-200 pt-20">
                 <Outlet context={{user, searchContent}}/>
             </div>
         </div>

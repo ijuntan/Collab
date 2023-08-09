@@ -12,6 +12,16 @@ module.exports = {
         }
     },
 
+    async getPostByUser(req, res) {
+        try {
+            const posts = await Post.find({createdBy: req.params.id}).sort({createdAt:-1})
+            console.log(posts)
+            res.status(200).json(posts)
+        } catch(error) {
+            res.status(400).json(error)
+        }
+    },
+
     async getPostByCategory(req, res) {
         try {
             //const posts = await Post.aggregate([{$match: {category: category}}, {$sample: {size: 10}}])

@@ -93,15 +93,18 @@ const Project = () => {
             {
                 project?.length>0 ?
                 <div className='flex flex-col w-full p-6 gap-6'>
-                    <div className='text-xl font-bold'>
+                    <div className='text-2xl font-bold'>
                         Projects
                     </div>
                     {project.map(item => (
                         <div key={item._id}
-                            className='border bg-white rounded-lg w-full p-4'
+                            className='border bg-white rounded-lg w-full drop-shadow-md cursor-pointer'
+                            onClick={()=>history(`${item._id}`)}
                         >
-                            <p className='flex '>
-                                Title: {item.name}
+                            <div className='flex bg-amber-600 rounded-t-lg px-4 py-2 drop-shadow-md'>
+                                <p className='font-bold'>
+                                    {item.name}
+                                </p>
                                 <div className='flex grow justify-end'>
                                     <button
                                         onClick={()=>deleteProject(item._id)}
@@ -109,15 +112,30 @@ const Project = () => {
                                         <MdDelete className='hover:text-red-400'/>
                                     </button>
                                 </div>
+                            </div>
+                            
+                            <p className='px-4 py-2 whitespace-pre border-b'>
+                                {`Description:\n${item.content}`}
                             </p>
-                            <p>
-                                Description: {item.content}
-                            </p>
-                            <p>
+
+                            <div className='px-4 py-2 whitespace-pre border-b'>
+
+                                {`Members:\n`}
+                                {
+                                    item.members.map(user => (
+                                        <p>
+                                            {`${user.username}\n`}
+                                        </p>
+                                    ))
+                                }
+                            </div>
+
+                            <p className='px-4 py-2'>
                                 Project Created: {new Date(item.createdAt).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'})}
                             </p>
                         </div>
                     ))}
+
                     <div className='flex justify-center'>
                         <button className='flex items-center text-md p-2 font-bold border rounded-xl bg-amber-700 text-white hover:text-slate-200'
                             onClick={()=>setOpenDialog(true)}

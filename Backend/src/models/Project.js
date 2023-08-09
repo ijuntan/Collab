@@ -11,6 +11,10 @@ const ProjectSchema = new Schema({
         type: String,
         required: true,
     },
+    list: {
+        type: [String],
+        required: true,
+    },
     category: {
         type: [String],
         required: true,
@@ -20,8 +24,13 @@ const ProjectSchema = new Schema({
         ref: "User",
         required: true,
     },
+    link: {
+        type: [{name:String, web:String}],
+        required: false,
+    },
     createdBy: {
-        type: String,
+        type: Types.ObjectId,
+        ref: "User",
         required: true
     },
 }, {

@@ -16,7 +16,8 @@ module.exports = {
       },
       width:{
         '70vw': '70vw',
-        'post': '50vw'
+        'post': '50vw',
+        'project': '35vw'
       },
       backgroundImage: {
         'hero': "url('../public/images/book.jpg')",

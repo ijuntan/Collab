@@ -183,7 +183,7 @@ const AddPost = ({
                 name: 
                 `Searching members for ${userProject.find(item => item._id === postLFM.project).name} project`,
                 content:
-                `We need the following people:\n${postLFM.personCat.join(`\n`)}\n\n${postLFM.desc}}`,
+                `We need the following people:\n${postLFM.personCat.join(`\n`)}\n\n${postLFM.desc}`,
                 category: userProject.find(item => item._id === postLFM.project).category,
                 like: 0,
                 dislike: 0,
@@ -191,7 +191,7 @@ const AddPost = ({
                 image: null,
                 createdBy: user._id
             }
-            console.log(post_final)
+            
             const success = await PostService.createPost(post_final)
             if(success) {
                 setOpenLFM(false)
