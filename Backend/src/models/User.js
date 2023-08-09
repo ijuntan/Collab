@@ -29,6 +29,7 @@ const UserSchema = new Schema({
         ref: "User",
         required: false
     },
+    
     resetPasswordToken: String,
     resetPasswordExpire: Date
 }, {

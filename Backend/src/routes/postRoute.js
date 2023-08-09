@@ -30,6 +30,7 @@ router.get('/posts', postController.getPost)
 router.get('/posts/:category', postController.getPostByCategory)
 router.get('/search', postController.getPostBySearch)
 router.get('/:id', postController.getPostById)
+router.get('/user_posts/:id', postController.getPostByUser)
 
 //router.post('/post', upload.single('image'), postController.createPost)
 router.post('/', postController.createPost)

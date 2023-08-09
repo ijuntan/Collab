@@ -509,7 +509,14 @@ const DashboardPage = () => {
                         }
                         
                     </div>
+
+                    <div className="flex flex-col bg-amber-600 rounded-lg p-4">
+                        <div className='text-white font-bold'>
+                            Notification Bar
+                        </div>
+                    </div>
                 </div>
+
             </div>
 
             {/* Dialog for create post */}

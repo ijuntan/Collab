@@ -30,10 +30,12 @@ const Header = ({
                 {/* Logo and Search Bar */}
                 <div className="flex grow gap-4 justify-center items-center">
                     {/* Logo */}
-                    <img
-                        src="./images/collab.png"
-                        className="h-10"
-                    />
+                    <button onClick={()=>history('/dash')}>
+                        <img
+                            src="./images/collab.png"
+                            className="h-10"
+                        />
+                    </button>
 
                     {/* Search Bar */}
                     <div className="relative">
@@ -66,7 +68,9 @@ const Header = ({
                         flex items-center h-full
                         text-amber-400 px-2
                         hover:bg-amber-800/75
-                    ">
+                    "
+                        onClick={()=>history('post')}
+                    >
                         Posts
                         <Down/>
                     </button>

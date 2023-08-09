@@ -16,6 +16,8 @@ import AddPost from './components/private_page/AddPost'
 import PostScreen from './components/private_page/PostScreen'
 import DashboardPage from './components/private_page/DashboardPage'
 import Project from './components/private_page/Project'
+import ProjectPage from './components/private_page/ProjectPage'
+import Post from './components/private_page/Post'
 
 const Navigation = () => {
     return (
@@ -34,7 +36,9 @@ const Navigation = () => {
                     <Route path="settings" element = {<Settings/>} />
                     <Route path="addpost" element = {<AddPost/>} />
                     <Route path="project" element = {<Project/>} />
+                    <Route path="post" element = {<Post/>} />
                     <Route path="post/:id" element = {<PostScreen/>} />
+                    <Route path="project/:id" element = {<ProjectPage/>} />
                 </Route>
             </Routes>
         </MainContextProvider>

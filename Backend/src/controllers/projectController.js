@@ -4,7 +4,7 @@ const config = require('../config/config');
 module.exports = {
     async getProjects(req, res) {
         try {
-            const projects = await Project.find({createdBy : req.params.id})
+            const projects = await Project.find({createdBy : req.params.id}).populate("members", "username")
             res.status(200).json(projects)
         }
         catch(err) {
@@ -15,7 +15,7 @@ module.exports = {
 
     async getProject(req, res) {
         try {
-            const project = await Project.findOne({_id : req.params.id})
+            const project = await Project.findOne({_id : req.params.id}).populate("members createdBy", "username")
             res.status(200).json(project)
         }
         catch(err) {
@@ -56,4 +56,34 @@ module.exports = {
             res.status(404).json({msg: "Please try again!"})
         }
     },
+
+    async addLinkToProject(req, res) {
+        try {
+            const project = await Project.findOneAndUpdate({_id : req.params.id}, {
+               $push:{
+                    link: req.body
+               } 
+            })
+            res.status(200).json(project)
+        }
+        catch(err) {
+            console.log(err)
+            res.status(404).json({msg: "Please try again!"})
+        }
+    },
+
+    async deleteLinkFromProject(req, res) {
+        try {
+            const project = await Project.findOneAndUpdate({_id : req.params.id}, {
+               $pull:{
+                    link: {_id: req.body.linkId}
+               } 
+            })
+            res.status(200).json(project)
+        }
+        catch(err) {
+            console.log(err)
+            res.status(404).json({msg: "Please try again!"})
+        }
+    }
 }
