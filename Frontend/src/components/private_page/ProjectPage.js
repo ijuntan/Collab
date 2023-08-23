@@ -6,7 +6,7 @@ import { SiDiscord, SiFacebook, SiGithub, SiGitlab, SiLinkedin, SiSlack, SiTwitt
 
 import { Dialog, Transition } from '@headlessui/react'
 
-import { useLocation } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import ProjectService from '../../services/projectService'
 
 const webType = [
@@ -39,14 +39,15 @@ const webType = [
         web:<SiLinkedin/>
     },
 ]
-
-const githubRegex = /^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_.-]+$/;
-const gitlabRegex = /^(https?:\/\/)?(www\.)?gitlab\.com\/[A-Za-z0-9_.-]+$/;
-const linkedRegex = /^(https?:\/\/)?(www\.)?linkedin\.com\/[A-Za-z0-9_.-]+$/;
-const discordRegex = /^(https?:\/\/)?(www\.)?discord\.com\/[A-Za-z0-9_.-]+$/;
-const slackRegex = /^(https?:\/\/)?(www\.)?slack\.com\/[A-Za-z0-9_.-]+$/;
-const facebookRegex = /^(https?:\/\/)?(www\.)?facebook\.com\/[A-Za-z0-9_.-]+$/;
-const twitterRegex = /^(https?:\/\/)?(www\.)?twitter\.com\/[A-Za-z0-9_.-]+$/;
+const regex = {
+    github : /^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_.-]+$/,
+    gitlab : /^(https?:\/\/)?(www\.)?gitlab\.com\/[A-Za-z0-9_.-]+$/,
+    linked : /^(https?:\/\/)?(www\.)?linkedin\.com\/[A-Za-z0-9_.-]+$/,
+    discord : /^(https?:\/\/)?(www\.)?discord\.com\/[A-Za-z0-9_.-]+$/,
+    slack : /^(https?:\/\/)?(www\.)?slack\.com\/[A-Za-z0-9_.-]+$/,
+    facebook : /^(https?:\/\/)?(www\.)?facebook\.com\/[A-Za-z0-9_.-]+$/,
+    twitter : /^(https?:\/\/)?(www\.)?twitter\.com\/[A-Za-z0-9_.-]+$/
+}
 
 const AddSocialComponent = ({
     open,
@@ -56,7 +57,8 @@ const AddSocialComponent = ({
 }) => {
     const [linkName, setLinkName] = useState("")
     const [web, setWeb] = useState(null)
-    
+    const [error, setError] = useState("")
+
     const handleClose = () => {
         setOpen(false)
         setLinkName("")
@@ -69,7 +71,12 @@ const AddSocialComponent = ({
                 name: linkName,
                 web: web
             }
-            if(save(link)) handleClose()
+            if(regex[web.toLowerCase()].test(linkName)) {
+                save(link).then(() => handleClose())
+            }
+            else{
+                setError("Enter a valid link!")
+            }
         }
     }
 
@@ -153,6 +160,118 @@ const AddSocialComponent = ({
                                     value={linkName}
                                     placeholder={web?"https://...":"Please choose a social link"}
                                     onChange = {e => setLinkName(e.target.value)}
+                                />
+                            </div>
+                            
+                            {error &&
+                                <div className="mt-2 text-red-500">
+                                    {error}
+                                </div>
+                            }
+                            
+
+                            <div className="flex gap-2 mt-4">
+                                <button
+                                    className="
+                                        bg-amber-600 text-sm text-white font-medium
+                                        rounded-lg px-4 py-2 border border-amber-600
+                                        hover:bg-amber-700 hover:border-amber-700
+                                    "
+                                    onClick={handleSave}
+                                >
+                                Save
+                                </button>
+
+                                <button
+                                    className="
+                                        bg-white text-sm font-medium
+                                        rounded-lg px-4 py-2 border border-amber-600
+                                        hover:bg-amber-700 hover:border-amber-700 hover:text-white
+                                    "
+                                    onClick={handleClose}
+                                >
+                                Cancel
+                                </button>
+                            </div>
+                        </Dialog.Panel>
+                    </Transition.Child>
+                    </div>
+                </div>
+            </Dialog>
+        </Transition>
+    )
+}
+
+const AddNotesComponent = ({
+    open,
+    setOpen,
+    save,
+}) => {
+    const [title, setTitle] = useState("")
+    
+    const handleClose = () => {
+        setOpen(false)
+        setTitle("")
+    }
+
+    const handleSave = () => {
+        save(title).then(()=>handleClose())
+    }
+
+    return(
+        <Transition appear show={open} as={Fragment}>
+            <Dialog as="div" className="relative z-50" onClose={handleClose}>
+                <Transition.Child
+                    as={Fragment}
+                    enter="ease-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in duration-200"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                >
+                    <div className="fixed inset-0 bg-black bg-opacity-25" />
+                </Transition.Child>
+
+                <div className="fixed inset-0 overflow-y-auto">
+                    <div className="flex min-h-full items-center justify-center p-4 text-center">
+                    <Transition.Child
+                        as={Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0 scale-95"
+                        enterTo="opacity-100 scale-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100 scale-100"
+                        leaveTo="opacity-0 scale-95"
+                    >
+                        <Dialog.Panel className="
+                            w-full max-w-4xl transform overflow-hidden rounded-2xl 
+                            bg-white p-6 text-left align-middle shadow-xl transition-all
+                        ">
+                            <Dialog.Title
+                                as="h3"
+                                className="
+                                    flex items-center gap-2
+                                    text-2xl font-medium leading-6 text-gray-900
+                                "
+                            >
+                                <MdDragIndicator/>
+
+                                <div>
+                                    Create a note
+                                </div>
+                            </Dialog.Title>
+
+                            <div className="mt-2">
+                                <input
+                                    className="
+                                        outline-none border rounded-lg
+                                        p-2 pr-10 w-full resize-none
+                                        placeholder-black
+                                        disabled:border-red-200
+                                    "
+                                    value={title}
+                                    onChange = {e => setTitle(e.target.value)}
                                 />
                             </div>
 
@@ -300,13 +419,32 @@ const InviteMemberComponent = ({
 const ProjectPage = () => {
     const [project, setProject] = useState(null)
     const [openSocial, setOpenSocial] = useState(false)
+    const [openNotes, setOpenNotes] = useState(false)
     const [openInvite, setOpenInvite] = useState(false)
-    const { pathname } = useLocation()
+    const {id: projectId} = useParams()
+    const navigate = useNavigate()
 
     const saveLink = async(link) => {
         try {
             const promise = await ProjectService.addLinkToProject(project._id, link)
             if(promise) {
+                fetchProject()
+                return true
+            }
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
+    const saveNotes = async(name) => {
+        try {
+            const promise = await ProjectService.createDocument({
+                title: name,
+                data: "",
+                projectID: project._id
+            })
+
+            if(promise.status = 200) {
                 fetchProject()
                 return true
             }
@@ -326,9 +464,20 @@ const ProjectPage = () => {
         }
     }
 
+    const deleteNote = async(noteId) => {
+        try {
+            const promise = await ProjectService.deleteDocument(noteId)
+            if(promise) {
+                fetchProject()
+            }
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
     const fetchProject = async() => {
         try {
-            const promise = await ProjectService.getProject(pathname.split('/')[3])
+            const promise = await ProjectService.getProject(projectId)
             setProject(promise.data)
         } catch(err) {
             console.log(err.data.response.error)
@@ -376,14 +525,11 @@ const ProjectPage = () => {
                         {project.members.map(user => (
                             <div className='flex items-center gap-2 drop-shadow-md'>
                                 <MdAccountCircle/>
-                                {user.username}
+                                {user.member.username}
                                 
-                                {
-                                    user.username === project.createdBy.username &&
-                                    <div className='font-bold'>
-                                        Leader
-                                    </div>
-                                }
+                                <div className='font-bold'>
+                                    {user.permission}
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -420,11 +566,47 @@ const ProjectPage = () => {
                 </button>
             </div>
 
+            <div className='flex flex-col rounded-md px-4 text-lg gap-2 items-center'>
+                <div className='font-bold text-lg'>
+                    Notes
+                </div>
+                
+                {
+                    project.document.map(item =>
+                        <div className='flex gap-2 border rounded p-2 border-black'>
+                            <button className='text-xl hover:text-gray-700' onClick={()=>navigate(`/dash/text/${item._id}`)}>
+                                {item.title}
+                            </button>
+                            <button
+                                onClick={()=>deleteNote(item._id)}
+                            >
+                                <MdDelete className='hover:text-red-400 text-gray-700'/>
+                            </button>
+                        </div>
+                    )
+                }
+
+                <button className='flex justify-center hover:text-gray-500' title="Add social link"
+                    onClick={()=>setOpenNotes(true)}
+                >
+                    <MdAddCircle/>
+                    <div className='font-bold text-sm'>
+                        Add Notes
+                    </div>
+                </button>
+            </div>
+
             <AddSocialComponent
                 open={openSocial}
                 setOpen={setOpenSocial}
                 save={saveLink}
                 definedWebType={project.link.map(item => item.web)}
+            />
+
+            <AddNotesComponent
+                open={openNotes}
+                setOpen={setOpenNotes}
+                save={saveNotes}
             />
 
             <InviteMemberComponent

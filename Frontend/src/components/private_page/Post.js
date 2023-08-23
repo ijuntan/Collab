@@ -41,7 +41,6 @@ const Post = () => {
         <>
         <div className="grow"/>
         <div className="flex grow">
-            {console.log(posts)}
             {
                 posts?.length>0 ?
                 <div className='flex flex-col w-full p-6 gap-6'>

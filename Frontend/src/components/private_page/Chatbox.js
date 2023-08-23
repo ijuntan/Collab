@@ -30,11 +30,14 @@ const Chatbox = ({
 
             socket.current.emit("sendMessage", msg)
             const promise = await ChatService.postMessage(msg)
-            if(promise) setConversation(prev => [...prev, {
+            if(promise) {
+                setConversation(prev => [...prev, {
                 sender: msg.sender,
                 message: msg.message,
                 time: Date.now()
             }])
+                setText("")
+            }
         }
         catch(err) {
             console.log(err.response.data.error)
@@ -43,6 +46,7 @@ const Chatbox = ({
 
     useEffect(()=>{
         socket.current = io("ws://localhost:8000")
+        socket.current.emit("addUser", account._id)
         socket.current.on("getMessage", data=> {
             setArrivalMessage({
                 message: data.message,
@@ -50,15 +54,16 @@ const Chatbox = ({
                 time: new Date()
             })
         })
+
+        return () => {
+            socket.current.disconnect()  
+        }
+
     },[])
 
     useEffect(()=>{
         arrivalMessage && setConversation(prev => [...prev, arrivalMessage])
     },[arrivalMessage])
-
-    useEffect(()=>{
-        socket.current.emit("addUser", account._id)
-    },[account])
 
     useEffect(() => {
         const fetchMsg = async() => {
@@ -92,6 +97,7 @@ const Chatbox = ({
             </div>
         )
     }
+
     return (
         <div className="fixed flex flex-col bottom-0 right-10 h-1/2 w-2/6 rounded-t-lg bg-white">
             {/* Header */}
@@ -102,7 +108,9 @@ const Chatbox = ({
                 </div>
 
                 <div className='flex justify-end grow'>
-                    <button onClick={()=>setChatTo(null)}>
+                    <button onClick={()=> {
+                        setChatTo(null) 
+                    }}>
                         <Cancel/>
                     </button>
                 </div>
@@ -133,8 +141,7 @@ const Chatbox = ({
                     <div className='flex text-black'></div>
                 }
             </div>
-             
-             
+                         
             {/* Footer */}
             <div className="flex gap-2 border-t-1 py-2 px-4">
                 <textarea
