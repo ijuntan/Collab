@@ -17,10 +17,10 @@ const PrivateScreen = () => {
     const [searchContent, setSearchContent] = useState("")
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-cream-200">
             <Header searchContent={searchContent} setSearchContent={setSearchContent}/> 
             
-            <div className="flex grow bg-cream-200 pt-20">
+            <div className="flex grow pt-20">
                 <Outlet context={{user, searchContent}}/>
             </div>
         </div>

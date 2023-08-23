@@ -18,13 +18,14 @@ import DashboardPage from './components/private_page/DashboardPage'
 import Project from './components/private_page/Project'
 import ProjectPage from './components/private_page/ProjectPage'
 import Post from './components/private_page/Post'
+import TextEditor from './components/private_page/TextEditor'
 
 const Navigation = () => {
     return (
         <MainContextProvider>
             <Routes>
-                <Route path="/" element = {<LandingPage/>} />
-                <Route path="forgot-password" element = {<ForgotPassword/>} />
+                <Route path="/" exact element = {<LandingPage/>} />
+                <Route path="forgot-password" exact element = {<ForgotPassword/>} />
                 <Route path="reset-password/:resetToken" element = {<ResetPassword/>} />
                 
                 <Route path="dash" element = {
@@ -39,6 +40,7 @@ const Navigation = () => {
                     <Route path="post" element = {<Post/>} />
                     <Route path="post/:id" element = {<PostScreen/>} />
                     <Route path="project/:id" element = {<ProjectPage/>} />
+                    <Route path="text/:id" element = {<TextEditor/>} />
                 </Route>
             </Routes>
         </MainContextProvider>

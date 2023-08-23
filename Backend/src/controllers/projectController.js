@@ -1,5 +1,4 @@
 const { Project } = require('../models')
-const config = require('../config/config');
 
 module.exports = {
     async getProjects(req, res) {
@@ -15,7 +14,11 @@ module.exports = {
 
     async getProject(req, res) {
         try {
-            const project = await Project.findOne({_id : req.params.id}).populate("members createdBy", "username")
+            const project = await Project.findOne({_id : req.params.id})
+                .populate("createdBy", "username")
+                .populate("members.member", "username")
+                .populate('document', 'title')
+
             res.status(200).json(project)
         }
         catch(err) {

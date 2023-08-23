@@ -5,6 +5,8 @@ const Action = require('./Action')
 const Conversation = require('./Conversation')
 const Project = require('./Project')
 const Invite = require('./Invite')
+const Document = require('./Document')
+const Notification = require('./Notification')
 
 module.exports = {
     User,
@@ -13,5 +15,7 @@ module.exports = {
     Action,
     Conversation,
     Project,
-    Invite
+    Invite,
+    Document,
+    Notification
 }

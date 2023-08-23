@@ -18,12 +18,20 @@ const ProjectService = {
     updateProject(id, content) {
         return axios.patch(`${API_URL}/${id}`, content)
     },
+
     addLinkToProject(id, content) {
         return axios.patch(`${API_URL}/addlink/${id}`, content)
     },
     deleteLinkFromProject(id, content) {
         return axios.patch(`${API_URL}/deletelink/${id}`, content)
-    }
+    },
+
+    createDocument(content) {
+        return axios.post(`${API_URL}/document`, content)
+    },
+    deleteDocument(id) {
+        return axios.delete(`${API_URL}/document/${id}`)
+    },
 }
 
 export default ProjectService
