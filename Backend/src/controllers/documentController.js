@@ -50,12 +50,12 @@ module.exports = {
                     } 
                 })
                 
-                res.status(200).json({msg:"document deleted"})
+                res.status(200).send({msg:"document deleted"})
             }
         }
         catch(err) {
             console.log(err)
-            res.status(404).json({msg: "Please try again!"})
+            res.status(404).send({msg: "Please try again!"})
         }
     },
 

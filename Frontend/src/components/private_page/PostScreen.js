@@ -55,7 +55,7 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
                         flex items-center bg-white rounded-lg gap-2
                         "
                     >
-                        <Account/>
+                        <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
                         {parent.createdBy.username} 
                         {dateDiff(parent.createdAt)}
                         {
@@ -361,9 +361,7 @@ const PostScreen = () => {
                 <div className="
                     flex gap-2 items-center
                 ">
-                    <div className="text-3xl">
-                        <Account/>
-                    </div>
+                    <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={post?.createdBy.profilePic || "/images/profile.svg"}/>
                     {post?.createdBy.username}
                     {dateDiff(post?.createdAt)}
                     
@@ -395,7 +393,6 @@ const PostScreen = () => {
                     >
                         {post?.name}
                     </div>
-
                     <div className={
                         `${!(post?.tag !== "normal") && "hidden"}
                             text-cream-200 border border-cream-200 px-2
@@ -410,6 +407,8 @@ const PostScreen = () => {
 
             <div className='flex flex-col gap-4 rounded-lg bg-amber-200 text-slate-800 p-4 drop-shadow-lg whitespace-pre-line'>
                 {post?.content}
+                
+                <img src={post?.image} className='w-100 h-auto'/>
 
                 <div className='flex items-center gap-2'>
                     <button className={`
@@ -476,6 +475,7 @@ const PostScreen = () => {
                     value={content}
                     onChange={e => setContent(e.target.value)}
                 />
+
                 <div className="flex justify-end bg-slate-200">
                     <button className="p-2 text-sm hover:underline"
                         onClick= {saveCommentToPost}
@@ -501,7 +501,7 @@ const PostScreen = () => {
                                 flex items-center bg-white rounded-lg gap-2
                                 "
                             >
-                                <Account/>
+                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
                                 {parent.createdBy.username} 
                                 {dateDiff(parent.createdAt)}
 

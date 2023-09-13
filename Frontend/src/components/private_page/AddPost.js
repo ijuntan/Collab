@@ -136,10 +136,15 @@ const AddPost = ({
                 like: 0,
                 dislike: 0,
                 tag: post.tagQuestion ? "question":"normal",
-                image: imageURL,
+                image: '',
                 createdBy: user._id
             }
-            const success = await PostService.createPost(post_final)
+
+            const formData = new FormData();
+            formData.append('image', imageURL);
+            const post_id = await PostService.createPost(post_final)
+            //console.log(post_id)
+            const success = await PostService.uploadImage(formData, post_id.data)
             if(success) {
                 setOpen(false)
                 history("/dash")
@@ -277,7 +282,7 @@ const AddPost = ({
                                     text-2xl font-medium leading-6 text-gray-900
                                 "
                             >
-                                <Account/>
+                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
                                 {user.username}
                                 <div className="flex grow justify-end">
                                     <button className="hover:opacity-50"
@@ -363,9 +368,13 @@ const AddPost = ({
                             </div>
 
                             <div className="mt-2">
-                                <img
-                                    src={imageURL}
-                                />
+                                {
+                                    imageURL &&
+                                    <img
+                                        src={URL.createObjectURL(imageURL)}
+                                    />
+                                }
+                                
                                 <button className={`
                                     ${!imageURL && "hidden"}
                                     bg-red-300 text-sm text-red-800
@@ -424,7 +433,7 @@ const AddPost = ({
                                         accept="image/*"
                                         onChange= {e => {
                                             const file = e.target.files[0]
-                                            setImageURL(URL.createObjectURL(file))
+                                            setImageURL(new Blob([file], { type: file.type }))
                                         }}
                                     />
                                 </div>

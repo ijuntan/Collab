@@ -29,7 +29,10 @@ const UserSchema = new Schema({
         ref: "User",
         required: false
     },
-    
+    profilePic: {
+        type: String,
+        required: false
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date
 }, {

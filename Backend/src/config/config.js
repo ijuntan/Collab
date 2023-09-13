@@ -4,5 +4,6 @@ module.exports = {
     },
     JwtSecret: process.env.JWT_SECRET || "super_secret",
     email: 'juniortanaya@outlook.com',
-    pass: 'valhalla1099'
+    pass: 'valhalla1099',
+    projectId: 13
 }

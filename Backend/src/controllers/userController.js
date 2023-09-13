@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User } = require('../models')
+const { User, Notification } = require('../models')
 const config = require('../config/config');
 const sendEmail = require('../services/sendEmail');
 const crypto = require('crypto')
@@ -16,14 +16,17 @@ module.exports = {
         try {
             const {selfName, friendName} = req.body
             const self = await User.findOneAndUpdate({_id: selfName}, {$push: {follows: friendName}})
-            const friend = await User.findOneAndUpdate({_id: friendName}, {$push: {followed: selfName}})
-
-            Promise.all([self, friend]).then(() => {
-                return res.status(200).send({msg: 'Success'})
+            await User.findOneAndUpdate({_id: friendName}, {$push: {followed: selfName}})
+            await Notification.create({
+                receiver: friendName,
+                msg: `${self.username} follows you.`,
+                isRead: false
             })
+
+            res.status(200).send({msg: 'Success'})
         }
         catch(err) {
-            return res.status(500).send({error: "Get Error"})
+            return res.status(500).send({error: err.message})
         }
     },
     async unfollowUser(req, res) {

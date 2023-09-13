@@ -16,7 +16,7 @@ module.exports = {
         try {
             const {id1, id2} = req.params
             const conv = await Conversation.findOne({participants: {$all: [id1, id2]}})
-            res.status(200).json(conv)
+            res.status(200).send(conv)
         } catch(error) {
             console.log(error)
         }
@@ -35,7 +35,7 @@ module.exports = {
                         }
                     }
                 })
-                res.status(200).json(done)
+                res.status(200).send(done)
             }
             else {
                 const body = {
@@ -47,7 +47,7 @@ module.exports = {
                     }]
                 }
                 const done = await createConversation(body)
-                res.status(200).json(done)
+                res.status(200).send(done)
             }
         }   
         catch(error) {
