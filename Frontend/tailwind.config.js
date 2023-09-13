@@ -14,10 +14,13 @@ module.exports = {
         'post': '30vh',
         'addpost': '50vh'
       },
+      minHeight: {
+        'post': '30vh',
+      },
       width:{
         '70vw': '70vw',
         'post': '50vw',
-        'project': '35vw'
+        'project': '35vw',
       },
       backgroundImage: {
         'hero': "url('../public/images/book.jpg')",

@@ -25,11 +25,18 @@ const PostService = {
     createPost(content) {
         return axios.post(`${API_URL}/`, content)
     },
+    uploadPost(content, id) {
+        return axios.post(`${API_URL}/${id}`, content)
+    },
     deletePost(id) {
         return axios.delete(`${API_URL}/${id}`)
     },
     updatePost(id, content) {
         return axios.patch(`${API_URL}/${id}`, content)
+    },
+
+    uploadImage(content, id) {
+        return axios.post(`${API_URL}/image/${id}`, content)
     },
 
     actionToPost(action) {

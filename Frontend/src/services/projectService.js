@@ -32,6 +32,10 @@ const ProjectService = {
     deleteDocument(id) {
         return axios.delete(`${API_URL}/document/${id}`)
     },
+
+    inviteMember(id, content) {
+        return axios.patch(`${API_URL}/invite/${id}`, content)
+    } 
 }
 
 export default ProjectService

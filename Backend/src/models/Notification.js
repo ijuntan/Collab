@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const { Schema, Types } = mongoose;
 
 const NotificationSchema = new Schema({
-    sender: {
+    sender: {    
         type: Types.ObjectId,
         ref:"User",
         required: false
@@ -13,8 +13,13 @@ const NotificationSchema = new Schema({
         ref:"User",
         required: true
     },
-    content: String,
-    isRead: false
+    projectId: {
+        type: Types.ObjectId,
+        ref:"Project",
+        required: false
+    },
+    msg: String,
+    isRead: Boolean
 },{
     timestamps: true
 })

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { 
     MdAccountCircle as Account, 
     MdExpandMore as Down,
@@ -6,12 +6,13 @@ import {
 } from 'react-icons/md'
 
 import { useNavigate } from 'react-router-dom'
+import { UserContext } from '../../services/authComponent'
 
 const Header = ({
     searchContent,
     setSearchContent
 }) => {
-
+    const {user} = useContext(UserContext)
     const history = useNavigate()
     const goToSetting = () => {
         history('settings')
@@ -32,7 +33,7 @@ const Header = ({
                     {/* Logo */}
                     <button onClick={()=>history('/dash')}>
                         <img
-                            src="./images/collab.png"
+                            src="/images/collab.png"
                             className="h-10"
                         />
                     </button>
@@ -89,8 +90,8 @@ const Header = ({
 
                     {/* Account */}
                     <div className="flex justify-end">
-                        <button onClick={goToSetting} className="text-5xl invert">
-                            <Account/>
+                        <button onClick={goToSetting}>
+                            <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
                         </button>
                     </div>
                 </div>

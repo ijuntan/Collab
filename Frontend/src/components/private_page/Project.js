@@ -122,13 +122,14 @@ const Project = () => {
                                 {`Description:\n${item.content}`}
                             </p>
 
-                            <div className='px-4 py-2 whitespace-pre border-b'>
+                            <div className='px-4 py-2 whitespace-pre border-b flex flex-col gap-2'>
 
                                 {`Members:\n`}
                                 {
                                     item.members.map(user => (
-                                        <p>
-                                            {`${user.username}\n`}
+                                        <p className='flex gap-2 items-center'>
+                                            <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.member.profilePic || "/images/profile.svg"}/>
+                                            {`${user.member.username}\n`}
                                         </p>
                                     ))
                                 }

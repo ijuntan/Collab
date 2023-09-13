@@ -3,7 +3,6 @@ import { MainContext } from '../../services/MainContext';
 import { useNavigate } from 'react-router-dom';
 import AuthService from '../../services/authService';
 import { Dialog, Transition } from '@headlessui/react'
-import { Link } from 'react-router-dom'
 import {MdVisibility as Eyes, MdVisibilityOff as NoEyes} from 'react-icons/md'
 
 const LoginForm = (props) => {

@@ -13,7 +13,8 @@ import {
     MdFilterList as Filter,
     MdAccountCircle as Account,
     MdShare as Share,
-    MdChat
+    MdChat,
+    MdCancel
 }
 from 'react-icons/md'
 import UserService from '../../services/userService'
@@ -48,6 +49,7 @@ const DashboardPage = () => {
     const [openLFM, setOpenLFM] = useState(false)
     const [openFriend, setOpenFriend] = useState(false)
     const [chatTo, setChatTo] = useState(null)
+    const [notifications, setNotifications] = useState(null)
 
     const history = useNavigate()
 
@@ -80,6 +82,11 @@ const DashboardPage = () => {
         }
     }
 
+    const fetchNotifications = async(id) => {
+        const promise = await UserService.getNotifications(id)
+        setNotifications(promise.data)
+    }
+
     useEffect(() => {
         if(searchContent === "") {
             if(filterCategory === "")
@@ -89,7 +96,19 @@ const DashboardPage = () => {
         }
         else fetchPostBySearch()
         
-    }, [ , filterCategory, searchContent])
+    }, [filterCategory, searchContent])
+
+    useEffect(() => {
+        if(searchContent === "") {
+            if(filterCategory === "")
+                fetchPost()
+            else
+                fetchPostByCategory()
+        }
+        else fetchPostBySearch()
+
+        fetchNotifications(user._id)
+    }, [])
 
     useEffect(() => {
         const fetchAction = async(id) => {
@@ -190,7 +209,7 @@ const DashboardPage = () => {
         return action.some(e => e.to === id && e.action === act)
     }
 
-    const dateDiff = (createdAt) => {
+    const dateDiff = (createdAt, color="text-slate-200") => {
         const now = new Date()
         const postDate = new Date(createdAt)
         const diff = Math.floor((now - postDate)/ (1000 * 3600 * 24))
@@ -201,10 +220,40 @@ const DashboardPage = () => {
         else text= diff + " Days Ago"
 
         return(
-            <div className='text-slate-200 text-xs mt-1'>
+            <div className={`${color} text-xs mt-1`}>
                 {text}
             </div>
         )
+    }
+
+    const updateNotif = async(id, action) => {
+        try {
+            await UserService.updateInvitation(id, {userAction:action})
+            fetchNotifications(user._id)
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
+
+    const deleteNotification = async(id) => {
+        try {
+            await UserService.deleteNotification(id)
+            fetchNotifications(user._id)
+        }
+        catch(err) {
+            console.log(err)
+        }
+    }
+
+    const checkNotif = async(id) => {
+        try {
+            await UserService.getNotification(id)
+            fetchNotifications(user._id)
+        }
+        catch(err) {
+            console.log(err)
+        }
     }
 
     return (
@@ -224,26 +273,20 @@ const DashboardPage = () => {
                         ">
                             {/* First Row */}
                             <div className="flex gap-3 items-center">
-                                <div className="text-4xl invert">
-                                    <Account/>
-                                </div>
+                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
 
-                                <button className="grow"
+                                <button className="
+                                    grow outline-none rounded-lg border
+                                    bg-transparent 
+                                    p-2 w-full cursor-text
+                                    placeholder-white text-white text-left
+                                "
                                     onClick={()=> {
                                         setPost(prev => ({...prev, tagQuestion: false}))
                                         setOpenCreatePostDialog(true)
                                     }}
                                 >
-                                    <input
-                                        className="
-                                            outline-none rounded-lg border
-                                            bg-transparent 
-                                            p-2 w-full cursor-text
-                                            placeholder-white text-white
-                                        "
-                                        disabled
-                                        placeholder="Create a post"
-                                    />
+                                    Create a post
                                 </button>
                             </div>
                             
@@ -359,9 +402,7 @@ const DashboardPage = () => {
                                     <div className="
                                         flex gap-2 items-center
                                     ">
-                                        <div className="text-3xl">
-                                            <Account/>
-                                        </div>
+                                        <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={item.createdBy.profilePic || "/images/profile.svg"}/>
                                         {item.createdBy.username}
                                         {dateDiff(item.createdAt)}
                                     </div>
@@ -379,6 +420,8 @@ const DashboardPage = () => {
                                             {item.name}
                                         </button>
 
+                                        <div className='grow'/>
+
                                         <div className={
                                             `${!(item.tag !== "normal") && "hidden"}
                                                 text-cream-200 border border-cream-200 px-2
@@ -388,6 +431,19 @@ const DashboardPage = () => {
                                         >
                                             {item.tag.toUpperCase()}
                                         </div>
+                                    </div>
+
+                                    <div className='flex gap-2'>
+                                        {
+                                            item.category.map(cat => (
+                                                <div key={cat} className="
+                                                    text-black bg-cream-200 px-2
+                                                    rounded-lg
+                                                ">
+                                                    {cat}
+                                                </div>
+                                            ))
+                                        }
                                     </div>
                                 </div>
                                 
@@ -478,15 +534,20 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Friend List */}
-                    <div className="flex flex-col h-80 p-4 text-white rounded-lg bg-amber-700">
-                        <div className="text-xl mb-4">
+                    <div className="flex flex-col h-80 p-4 text-white rounded-lg bg-amber-700 gap-2">
+                        <div className="text-xl">
                             Following List
                         </div>
                         {   user.follows?.length>0 &&
                             user.follows.map(item => (
                                 <div key={item._id} className="flex text-white">
-                                    <button className='flex items-center gap-2'>
-                                        <Account/>
+                                    <button className='flex items-center gap-2'
+                                        onClick={()=>{
+                                            setOpenFriend(true)
+                                            setFriendFound(item)
+                                        }}
+                                    >
+                                        <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={item.profilePic || "/images/profile.svg"}/>
                                         {item.username}
                                     </button>
                                     
@@ -510,9 +571,61 @@ const DashboardPage = () => {
                         
                     </div>
 
-                    <div className="flex flex-col bg-amber-600 rounded-lg p-4">
-                        <div className='text-white font-bold'>
+                    <div className="flex flex-col bg-amber-600 rounded-lg min-h-post">
+                        <div className='text-white font-bold p-4'>
                             Notification Bar
+                        </div>
+
+                        <div className="flex flex-col gap-2 p-4 bg-amber-200 rounded-b-lg h-full shadow-lg divide-y divide-amber-600">
+                            {
+                                notifications?.length > 0 ?
+                                notifications.map(item => (
+                                    <div key={item._id} className="flex flex-col gap-2 pt-2">
+                                        <div className='flex'>
+                                            <div className="flex flex-grow">
+                                                <button onClick={()=>checkNotif(item._id)}>
+                                                    {item.msg}
+                                                </button>
+                                                <div>
+                                                    {!item.isRead &&
+                                                        <div className="bg-red-500 rounded-lg w-2 h-2 ml-2"/>
+                                                    }
+                                                </div>
+                                            </div>
+                                            
+
+                                            <div className="flex-grow-0 mr-2">
+                                                {dateDiff(item.createdAt, "text-amber-700")}
+                                            </div>
+                                            <button onClick={()=>deleteNotification(item._id)}>
+                                                <MdCancel/>
+                                            </button>
+                                        </div>
+
+                                        {
+                                            item?.projectId &&
+                                            <div className='flex gap-2'>
+                                            <button className='text-green-500 hover:opacity-50'
+                                                onClick={() => updateNotif(item._id, "accept")}
+                                            >
+                                                Accept
+                                            </button>
+                                            
+                                            {/* on hover change opacity */}
+                                            <button className='text-red-500 hover:opacity-50'
+                                                onClick={() => updateNotif(item._id, "decline")}
+                                            >
+                                                Decline
+                                            </button>
+                                            </div>
+                                        }
+                                    </div>
+                                ))
+                                :
+                                <div>
+                                    No Notification
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>

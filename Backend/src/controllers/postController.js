@@ -1,14 +1,15 @@
 const { Post, Comment, User, Action } = require('../models')
+const myMulter = require('../routes/storage')
 
 module.exports = {
     async getPost(req, res) {
         try {
             //const posts = await Post.aggregate([{$sample: {size: 10}}])
-            const posts = await Post.find({}).populate("createdBy", "username")
+            const posts = await Post.find({}).populate("createdBy", "username profilePic")
             //console.log(posts)
-            res.status(200).json(posts)
+            res.status(200).send(posts)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
@@ -16,70 +17,76 @@ module.exports = {
         try {
             const posts = await Post.find({createdBy: req.params.id}).sort({createdAt:-1})
             console.log(posts)
-            res.status(200).json(posts)
+            res.status(200).send(posts)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
     async getPostByCategory(req, res) {
         try {
             //const posts = await Post.aggregate([{$match: {category: category}}, {$sample: {size: 10}}])
-            const posts = await Post.find({category: req.query.search}).populate("createdBy", "username")
-            res.status(200).json(posts)
+            const posts = await Post.find({category: req.query.search}).populate("createdBy", "username profilePic")
+            res.status(200).send(posts)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
     async getPostBySearch(req, res) {
         try {
             const posts = await Post.aggregate([{$match: {name: {$regex: req.query.s, '$options': 'i'}}}])
-            await User.populate(posts, {path: "createdBy", select:"username"});
-            res.status(200).json(posts)
+            await User.populate(posts, {path: "createdBy", select:"username profilePic"});
+            res.status(200).send(posts)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
     async getPostById(req, res) {
         try {
-            const post = await Post.findById(req.params.id).populate("createdBy", "username")
-            res.status(200).json(post)
+            const post = await Post.findById(req.params.id).populate("createdBy", "username profilePic")
+            res.status(200).send(post)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
     async createPost(req, res) {
         try {
             const post = await Post.create(req.body)
-            res.status(200).json(post)
+            res.status(200).send(post._id)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
     async updatePost(req, res) {
         try {
             const {id} = req.params
-            const res1 = await Post.findOneAndUpdate({_id: id}, {...req.body})
-            res.status(200).json(result)
+            const res = await Post.findOneAndUpdate({_id: id}, {...req.body})
+            res.status(200).send(result)
         }
         catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
     async deletePost(req, res) {
         try {
             const {id} = req.params
+            const postToBeDeleted = await Post.findById(id)
+            if(postToBeDeleted.image){
+                const fileToBeDeleted = myMulter.bucket.file(postToBeDeleted.image.split('/')[4])
+                await fileToBeDeleted.delete()
+            }
             const res1 = await Post.deleteOne({_id: id})
             const res2 = await Comment.deleteMany({postId: id})
-            await Promise.all([res1, res2]).then((result)=>res.status(200).json(result))
+            
+            await Promise.all([res1, res2]).then((result)=>res.status(200).send(result))
         }
         catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
@@ -93,9 +100,9 @@ module.exports = {
             else {
                 await Post.findOneAndUpdate({_id: action.to}, {$inc: {dislike: 1}})
             }
-            res.status(200).json(action)
+            res.status(200).send(action)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
@@ -104,9 +111,9 @@ module.exports = {
             const {id} = req.params
             const actionList = await Action.find({accountID: id}, "to action")
 
-            res.status(200).json(actionList)
+            res.status(200).send(actionList)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 
@@ -128,9 +135,9 @@ module.exports = {
                     else await Post.findOneAndUpdate({_id: postID}, {$inc: {dislike: 1}})
                 } 
             }
-            res.status(200).json(result)
+            res.status(200).send(result)
         } catch(error) {
-            res.status(400).json(error)
+            res.status(400).send(error)
         }
     },
 }

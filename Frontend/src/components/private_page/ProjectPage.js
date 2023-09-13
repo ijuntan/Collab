@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useContext, useEffect, useState } from 'react'
 import Loading from './Loading'
 
 import { MdAccountCircle, MdAddCircle, MdClose, MdDelete, MdDragIndicator, MdOutlinePerson, MdPersonAdd } from 'react-icons/md'
@@ -8,6 +8,8 @@ import { Dialog, Transition } from '@headlessui/react'
 
 import { useParams, useNavigate } from 'react-router-dom'
 import ProjectService from '../../services/projectService'
+import { UserContext } from '../../services/authComponent'
+import userService from '../../services/userService'
 
 const webType = [
     {
@@ -310,18 +312,51 @@ const AddNotesComponent = ({
 const InviteMemberComponent = ({
     open,
     setOpen,
-    save,
+    project,
 }) => {
+    const { user } = useContext(UserContext)
     const [name, setName] = useState("")
-    
+    const [success, setSuccess] = useState("")
+    const [error, setError] = useState("")
+
     const handleClose = () => {
         setOpen(false)
         setName("")
     }
 
-    const handleSave = () => {
+    const handleSave = async() => {
+        if(name === user.username) {
+            setError("You can't invite yourself!")
+            return
+        }
         if(name !== "") {
-            //if(save(link)) handleClose()
+            try {
+                const target = await userService.getUserByName(name)
+                if(target.data) {
+                    const invitation = {
+                        sender: user._id,
+                        receiver: target.data._id,
+                        projectId: project._id,
+                        msg: `${user.username} invited you to join ${project.name} project`,
+                        isRead: false
+                    }
+                    const promise = await userService.sendInvitation(invitation)
+                    if(promise.status === 200) {
+                        setSuccess("Invitation sent!")
+                        setError("")
+                    }
+                    else {
+                        setError("Invitation failed!")
+                        setSuccess("")
+                    }
+                }
+                else {
+                    setError("User not found!")
+                }
+            }
+            catch(err) {
+                    console.log(err)
+            }
         }
     }
 
@@ -383,7 +418,19 @@ const InviteMemberComponent = ({
                                     onChange = {e => setName(e.target.value)}
                                 />
                             </div>
+                            
+                            {error &&
+                                <div className="mt-2 text-red-500">
+                                    {error}
+                                </div>
+                            }
 
+                            {success &&
+                                <div className="mt-2 text-green-500">
+                                    {success}
+                                </div>
+                            }
+                            
                             <div className="flex gap-2 mt-4">
                                 <button
                                     className="
@@ -521,14 +568,13 @@ const ProjectPage = () => {
                         </button>
                     </div>
 
-                    <div className="bg-white p-4 pt-8 drop-shadow-md rounded-b-lg -translate-y-4">
+                    <div className="bg-white p-4 pt-8 drop-shadow-md rounded-b-lg -translate-y-4 gap-2 flex flex-col">
                         {project.members.map(user => (
                             <div className='flex items-center gap-2 drop-shadow-md'>
-                                <MdAccountCircle/>
+                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.member.profilePic || "/images/profile.svg"}/>
                                 {user.member.username}
-                                
                                 <div className='font-bold'>
-                                    {user.permission}
+                                    {user.permission === "Admin" && user.permission}
                                 </div>
                             </div>
                         ))}
@@ -612,6 +658,7 @@ const ProjectPage = () => {
             <InviteMemberComponent
                 open={openInvite}
                 setOpen={setOpenInvite}
+                project={project}
             />
             
         </div>

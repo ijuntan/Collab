@@ -2,11 +2,9 @@ import React, { useContext, useEffect, useState } from 'react'
 import PostService from '../../services/postService'
 import { UserContext } from '../../services/authComponent'
 import { useNavigate } from 'react-router-dom'
-import { MdAccountCircle } from 'react-icons/md'
 
 const Post = () => {
     const {user} = useContext(UserContext)
-    console.log(user)
     const history = useNavigate()
 
     const [posts, setPosts] = useState(null)
