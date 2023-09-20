@@ -1,5 +1,4 @@
-const { User, Conversation} = require('../models')
-const config = require('../config/config');
+const {Conversation} = require('../models')
 
 const createConversation = async (body) => {
     try {

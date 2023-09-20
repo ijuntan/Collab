@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken');
 const { User, Notification } = require('../models')
-const config = require('../config/config');
 const sendEmail = require('../services/sendEmail');
 const crypto = require('crypto')
+require('dotenv').config();
 
 function jwtSignUser(user) {
     const ONE_WEEK = 7 * 60 * 60 * 24 * 1000
-    return jwt.sign(user, config.JwtSecret, {
+    return jwt.sign(user, process.env.JWT_SECRET, {
         expiresIn: ONE_WEEK
     })
 }
