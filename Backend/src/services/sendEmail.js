@@ -1,16 +1,16 @@
 const nodemailer = require('nodemailer')
-const config = require('../config/config')
+
 const sendEmail = (options) => {
     const transporter = nodemailer.createTransport({
         service: 'hotmail',
         auth: {
-            user: config.email,
-            pass: config.pass
+            user: process.env.EMAIL,
+            pass: process.env.PASS
         }
     })
 
     const mailOptions = {
-        from: "juniortanaya@outlook.com",
+        from: process.env.EMAIL,
         to: options.to,
         subject: options.subject,
         html: options.text

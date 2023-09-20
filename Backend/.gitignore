@@ -4,7 +4,7 @@
 /node_modules
 /.pnp
 .pnp.js
-/src/config/config.js
+.env
 /src/config/eastern-bedrock-396813-c57f6c410ede.json
 # testing
 /coverage

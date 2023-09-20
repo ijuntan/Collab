@@ -3,10 +3,11 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const { db } = require('./config/config');
 const api = require('./routes');
 const { isAuthenticated } = require('./middleware');
 mongoose.set('strictQuery', true);
+
+require('dotenv').config();
 
 const app = express();
 
@@ -20,7 +21,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(helmet());
 
-mongoose.connect(db.mongoURI, {
+mongoose.connect(process.env.MONGO_URI, {
     useUnifiedTopology: true,
     useNewUrlParser: true
 }).then(() => {
