@@ -1,6 +1,6 @@
-import axios from 'axios'
+import { axios } from './axiosUtils'
 
-const API_URL = "http://localhost:8080/api/v1/project"
+const API_URL = "project"
 
 const ProjectService = {
     getProjects(id) {

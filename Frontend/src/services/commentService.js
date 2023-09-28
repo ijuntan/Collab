@@ -1,6 +1,6 @@
-import axios from 'axios'
+import { axios } from './axiosUtils'
 
-const API_URL = "http://localhost:8080/api/v1/comment"
+const API_URL = "comment"
 
 const CommentService = {
     getComment(id) {

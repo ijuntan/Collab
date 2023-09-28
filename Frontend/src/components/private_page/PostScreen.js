@@ -55,7 +55,7 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
                         flex items-center bg-white rounded-lg gap-2
                         "
                     >
-                        <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
+                        <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
                         {parent.createdBy.username} 
                         {dateDiff(parent.createdAt)}
                         {
@@ -361,7 +361,7 @@ const PostScreen = () => {
                 <div className="
                     flex gap-2 items-center
                 ">
-                    <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={post?.createdBy.profilePic || "/images/profile.svg"}/>
+                    <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={post?.createdBy.profilePic || "/images/profile.svg"}/>
                     {post?.createdBy.username}
                     {dateDiff(post?.createdAt)}
                     
@@ -501,7 +501,7 @@ const PostScreen = () => {
                                 flex items-center bg-white rounded-lg gap-2
                                 "
                             >
-                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
+                                <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
                                 {parent.createdBy.username} 
                                 {dateDiff(parent.createdAt)}
 

@@ -11,6 +11,7 @@ import {
 } from 'react-icons/md'
 import PostService from '../../services/postService'
 import ProjectService from '../../services/projectService'
+import ProfilePic from './ProfilePic'
 
 const personCategoryList = [
     {
@@ -282,7 +283,7 @@ const AddPost = ({
                                     text-2xl font-medium leading-6 text-gray-900
                                 "
                             >
-                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
+                                <ProfilePic/>
                                 {user.username}
                                 <div className="flex grow justify-end">
                                     <button className="hover:opacity-50"

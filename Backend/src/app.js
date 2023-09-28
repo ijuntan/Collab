@@ -8,14 +8,14 @@ const { isAuthenticated } = require('./middleware');
 mongoose.set('strictQuery', true);
 
 require('dotenv').config();
+require('./services/passport')
 
 const app = express();
 
 //todo: adding whitelist
 app.use(cors({
-    origin:"http://localhost:3000"
+    origin:process.env.FRONTEND_URI
 }));
-require('./services/passport')
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());

@@ -1,16 +1,14 @@
 const app = require('./app');
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT;
 
 const documentController = require('../src/controllers/documentController')
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}.`);
-})
+app.listen(PORT)
 
 const io = require("socket.io")(8000, {
     cors: {
-        origin:"http://localhost:3000"
+        origin: process.env.FRONTEND_URI
     }
 })
 

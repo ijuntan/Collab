@@ -1,10 +1,14 @@
-import axios from 'axios'
+import { axios } from './axiosUtils'
 
-const API_URL = "http://localhost:8080/api/v1/post"
+const API_URL = "post"
 
 const PostService = {
-    getPost() {
-        return axios.get(`${API_URL}/posts`)
+    getPost(skip) {
+        return axios.get(`${API_URL}/posts`,{
+            params: {
+                skip:skip
+            }
+        })
     },
     getPostByCategory(filter) {
         return axios.get(`${API_URL}/posts/${filter}`)

@@ -4,9 +4,7 @@ const myMulter = require('../routes/storage')
 module.exports = {
     async getPost(req, res) {
         try {
-            //const posts = await Post.aggregate([{$sample: {size: 10}}])
-            const posts = await Post.find({}).populate("createdBy", "username profilePic")
-            //console.log(posts)
+            const posts = await Post.find().sort({createdAt:-1}).skip(req.query.skip).limit(3).populate("createdBy", "username profilePic")
             res.status(200).send(posts)
         } catch(error) {
             res.status(400).send(error)

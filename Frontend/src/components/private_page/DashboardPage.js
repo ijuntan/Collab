@@ -22,6 +22,8 @@ import PostService from '../../services/postService'
 import AddPost from './AddPost'
 import UserProfile from './UserProfile'
 import Chatbox from './Chatbox'
+import ProfilePic from './ProfilePic'
+import InfiniteScroll from 'react-infinite-scroll-component';
 
 const sortCat = [
     "Hot",
@@ -50,6 +52,7 @@ const DashboardPage = () => {
     const [openFriend, setOpenFriend] = useState(false)
     const [chatTo, setChatTo] = useState(null)
     const [notifications, setNotifications] = useState(null)
+    const [morePost, setMorePost] = useState(true)
 
     const history = useNavigate()
 
@@ -62,8 +65,12 @@ const DashboardPage = () => {
     )
 
     const fetchPost = async() => {
-        const promise = await PostService.getPost()
-        setPosts(promise.data)
+        const promise = await PostService.getPost(posts? posts.length : 0)
+        if(posts?.length > 0) {
+            setMorePost(promise.data.length > 0)
+            setPosts(prev => [...prev, ...promise.data])
+        }
+        else setPosts(promise.data)
     }
 
     const fetchPostByCategory = async() => {
@@ -87,26 +94,26 @@ const DashboardPage = () => {
         setNotifications(promise.data)
     }
 
-    useEffect(() => {
-        if(searchContent === "") {
-            if(filterCategory === "")
-                fetchPost()
-            else
-                fetchPostByCategory()
-        }
-        else fetchPostBySearch()
+    // useEffect(() => {
+    //     if(searchContent === "") {
+    //         if(filterCategory === "")
+    //             fetchPost()
+    //         else
+    //             fetchPostByCategory()
+    //     }
+    //     else fetchPostBySearch()
         
-    }, [filterCategory, searchContent])
+    // }, [filterCategory, searchContent])
 
     useEffect(() => {
-        if(searchContent === "") {
-            if(filterCategory === "")
-                fetchPost()
-            else
-                fetchPostByCategory()
-        }
-        else fetchPostBySearch()
-
+        // if(searchContent === "") {
+        //     if(filterCategory === "")
+        //         fetchPost()
+        //     else
+        //         fetchPostByCategory()
+        // }
+        // else fetchPostBySearch()
+        fetchPost();
         fetchNotifications(user._id)
     }, [])
 
@@ -262,7 +269,7 @@ const DashboardPage = () => {
             
             {/* Main Screen */}
             <div className="flex grow py-4 gap-6">
-                <div className="flex flex-col grow-[2] gap-4">
+                <div className="flex flex-col grow-[2] gap-4 overflow-auto">
                     {/* Create Post */}
                     <div className="flex justify-center">
                         {/* Card for Create Post */}
@@ -273,7 +280,7 @@ const DashboardPage = () => {
                         ">
                             {/* First Row */}
                             <div className="flex gap-3 items-center">
-                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
+                                <ProfilePic/>
 
                                 <button className="
                                     grow outline-none rounded-lg border
@@ -382,8 +389,20 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Post  */}
-                    {   posts &&
-                        posts.map(item => (
+                    
+                    <InfiniteScroll
+                        dataLength={posts?.length || 0}
+                        next={fetchPost}
+                        hasMore={morePost}
+                        loader={<div>Loading ...</div>}
+                        endMessage={
+                            <p style={{ textAlign: 'center' }}>
+                              <b>Yay! You have seen it all</b>
+                            </p>
+                        }
+                        className="flex flex-col gap-4"
+                    >
+                        { posts && posts.map(item => (
                             // Post Card
                             <div
                                 key={item._id}
@@ -402,7 +421,7 @@ const DashboardPage = () => {
                                     <div className="
                                         flex gap-2 items-center
                                     ">
-                                        <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={item.createdBy.profilePic || "/images/profile.svg"}/>
+                                        <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={item.createdBy.profilePic || "/images/profile.svg"}/>
                                         {item.createdBy.username}
                                         {dateDiff(item.createdAt)}
                                     </div>
@@ -499,8 +518,9 @@ const DashboardPage = () => {
                                     </button>
                                 </div>
                             </div>
-                        ))
-                    }
+                        ))}
+                                        
+                    </InfiniteScroll>
                 </div>
                 
                 {/* Friend System */}
@@ -547,7 +567,7 @@ const DashboardPage = () => {
                                             setFriendFound(item)
                                         }}
                                     >
-                                        <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={item.profilePic || "/images/profile.svg"}/>
+                                        <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={item.profilePic || "/images/profile.svg"}/>
                                         {item.username}
                                     </button>
                                     

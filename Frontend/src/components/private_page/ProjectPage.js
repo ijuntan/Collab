@@ -571,7 +571,7 @@ const ProjectPage = () => {
                     <div className="bg-white p-4 pt-8 drop-shadow-md rounded-b-lg -translate-y-4 gap-2 flex flex-col">
                         {project.members.map(user => (
                             <div className='flex items-center gap-2 drop-shadow-md'>
-                                <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.member.profilePic || "/images/profile.svg"}/>
+                                <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={user.member.profilePic || "/images/profile.svg"}/>
                                 {user.member.username}
                                 <div className='font-bold'>
                                     {user.permission === "Admin" && user.permission}

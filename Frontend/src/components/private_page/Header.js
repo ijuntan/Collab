@@ -7,6 +7,7 @@ import {
 
 import { useNavigate } from 'react-router-dom'
 import { UserContext } from '../../services/authComponent'
+import ProfilePic from './ProfilePic'
 
 const Header = ({
     searchContent,
@@ -91,7 +92,7 @@ const Header = ({
                     {/* Account */}
                     <div className="flex justify-end">
                         <button onClick={goToSetting}>
-                            <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
+                            <ProfilePic/>
                         </button>
                     </div>
                 </div>

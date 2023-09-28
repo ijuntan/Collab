@@ -1,6 +1,6 @@
-import axios from 'axios'
+import { axios } from './axiosUtils'
 
-const API_URL = "http://localhost:8080/api/v1/chat/"
+const API_URL = "chat/"
 
 const userService = {
     getConversation(id1, id2) {

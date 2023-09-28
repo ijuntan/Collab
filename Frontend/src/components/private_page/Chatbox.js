@@ -103,7 +103,7 @@ const Chatbox = ({
             {/* Header */}
             <div className="flex bg-amber-800 p-2 items-center rounded-t-lg">
                 <div className="flex items-center gap-2">
-                    <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.profilePic || "/images/profile.svg"}/>
+                    <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={user.profilePic || "/images/profile.svg"}/>
                     {user.username}
                 </div>
 

@@ -12,7 +12,8 @@ module.exports = {
         'hero': '900px',
         'feat': '800px',
         'post': '30vh',
-        'addpost': '50vh'
+        'addpost': '50vh',
+        'load': '500px'
       },
       minHeight: {
         'post': '30vh',

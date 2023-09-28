@@ -1,10 +1,10 @@
-import React, { useEffect, useContext, useState } from 'react'
-import {useOutletContext} from 'react-router-dom'
+import React, { useContext, useState } from 'react'
 import AuthService from '../../services/authService'
 import { useNavigate } from 'react-router-dom'
 import { MainContext } from '../../services/MainContext'
 import userService from '../../services/userService'
 import { UserContext } from '../../services/authComponent'
+import ProfilePic from './ProfilePic'
 
 const Settings = () => {
     const {setJwt} = useContext(MainContext)
@@ -46,7 +46,7 @@ const Settings = () => {
                     x
                 </button>
                 <div className='flex flex-col items-center'>
-                    <img className='border rounded-full w-40 h-40 bg-gray-200 object-contain' src={profilePic || "/images/profile.svg"}/>
+                    <ProfilePic width={40} height={40}/>
 
                     <div className="text-2xl font-bold mt-4">
                         {user.username}

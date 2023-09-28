@@ -128,7 +128,7 @@ const Project = () => {
                                 {
                                     item.members.map(user => (
                                         <p className='flex gap-2 items-center'>
-                                            <img className='border rounded-full w-10 h-10 bg-gray-200 object-contain' src={user.member.profilePic || "/images/profile.svg"}/>
+                                            <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={user.member.profilePic || "/images/profile.svg"}/>
                                             {`${user.member.username}\n`}
                                         </p>
                                     ))
