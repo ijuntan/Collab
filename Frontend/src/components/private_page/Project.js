@@ -55,10 +55,10 @@ const Project = () => {
                 content: projectDialog.desc,
                 category: category,
                 document: [],
-                members: {
+                members: [{
                     member: user._id,
                     permission: "Admin"
-                },
+                }],
                 createdBy: user._id
             }
             const success = await ProjectService.createProject(projectFinal)

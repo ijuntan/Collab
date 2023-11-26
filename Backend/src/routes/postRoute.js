@@ -4,7 +4,7 @@ const {v4: uuidv4} = require('uuid')
 const postController = require('../controllers/postController')
 const { Post } = require('../models');
 
-const myMulter = require('../routes/storage');
+const myMulter = require('./storage');
 const notificationController = require('../controllers/notificationController');
 
 router.get('/', (req, res) => {
@@ -51,6 +51,7 @@ router.post('/image/:id', myMulter.upload.single('image'), async (req, res) => {
 
     } catch (error) {
     await Post.deleteOne({_id: req.params.id})
+      console.error('Error processing upload:', error);
       res.status(500).send('Error processing upload');
     }
 })
@@ -60,6 +61,7 @@ router.patch('/:id', postController.updatePost)
 router.delete('/:id', postController.deletePost)
 
 router.get('/action/:id', postController.getActionUser)
+router.get('/action/:uid/:pid', postController.getActionUserPost)
 router.post('/action', postController.actionToPost)
 router.put('/action', postController.updateActionPost)
 

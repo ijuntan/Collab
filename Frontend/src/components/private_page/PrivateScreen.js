@@ -3,15 +3,6 @@ import { UserContext } from '../../services/authComponent'
 import { Outlet} from 'react-router-dom'
 import Header from "./Header"
 
-const filterCategory = [
-    "None",
-    "Website",
-    "AI",
-    "Electronics",
-    "Science",
-    "Business"
-]
-
 const PrivateScreen = () => {
     const {user} = useContext(UserContext);
     const [searchContent, setSearchContent] = useState("")

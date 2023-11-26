@@ -12,13 +12,14 @@ import AuthComponent from './services/authComponent'
 // Private Page
 import PrivateScreen from './components/private_page/PrivateScreen'
 import Settings from './components/private_page/Settings'
-import AddPost from './components/private_page/AddPost'
+import AddPost from './components/private_page/AddPost/AddPostNavigation'
 import PostScreen from './components/private_page/PostScreen'
-import DashboardPage from './components/private_page/DashboardPage'
 import Project from './components/private_page/Project'
 import ProjectPage from './components/private_page/ProjectPage'
 import Post from './components/private_page/Post'
 import TextEditor from './components/private_page/TextEditor'
+
+import DashboardContainer from './components/private_page/Dashboard/DashboardContainer'
 
 const Navigation = () => {
     return (
@@ -33,7 +34,7 @@ const Navigation = () => {
                         <PrivateScreen/>
                     </AuthComponent>
                 }>
-                    <Route path="" element = {<DashboardPage/>} />
+                    <Route path="" element = {<DashboardContainer/>} />
                     <Route path="settings" element = {<Settings/>} />
                     <Route path="addpost" element = {<AddPost/>} />
                     <Route path="project" element = {<Project/>} />

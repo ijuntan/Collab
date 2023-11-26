@@ -50,7 +50,7 @@ const PostService = {
         return axios.get(`${API_URL}/action/${id}`)
     },
     updateActionPost(act) {
-        return axios.put(`${API_URL}/action`, act)
+        return axios.patch(`${API_URL}/action`, act)
     },
 }
 

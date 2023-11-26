@@ -37,12 +37,13 @@ io.on("connection", (socket) => {
     })
 
     //send msg
-    socket.on("sendMessage", ({ receiver, sender, message }) => {
+    socket.on("sendMessage", ({ receiver, sender, message, time }) => {
         const user = getUser(receiver);
         if(user) {
             io.to(user.socketId).emit("getMessage", {
                 sender,
                 message,
+                time,
               });
         }
       });

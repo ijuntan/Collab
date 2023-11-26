@@ -19,7 +19,7 @@ const NotificationSchema = new Schema({
         required: false
     },
     msg: String,
-    isRead: Boolean
+    isRead: { type: Boolean, default: false }
 },{
     timestamps: true
 })

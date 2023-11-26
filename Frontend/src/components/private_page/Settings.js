@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { MainContext } from '../../services/MainContext'
 import userService from '../../services/userService'
 import { UserContext } from '../../services/authComponent'
-import ProfilePic from './ProfilePic'
+import ProfilePic from '../../utils/ProfilePic'
 
 const Settings = () => {
     const {setJwt} = useContext(MainContext)
@@ -46,7 +46,7 @@ const Settings = () => {
                     x
                 </button>
                 <div className='flex flex-col items-center'>
-                    <ProfilePic width={40} height={40}/>
+                    <ProfilePic width={40} height={40} src="self"/>
 
                     <div className="text-2xl font-bold mt-4">
                         {user.username}

@@ -2,6 +2,7 @@ import React, { useEffect, useContext, createContext, useState } from 'react'
 import { MainContext } from './MainContext'
 import { useNavigate } from 'react-router-dom'
 import userService from './userService'
+import AuthService from './authService'
 
 export const UserContext  = createContext()
 
@@ -21,17 +22,22 @@ const AuthComponent = (props) => {
         }
 
         fetchUser()
-    }, [ ,jwt, history])
+    }, [ , jwt, history])
 
     if(!jwt || jwt === '') {
         return history('/')
     }
     
     return(
-        <UserContext.Provider value={{user, fetchUser}}>
+        <UserContext.Provider value={{user, setUser, fetchUser}}>
             {props.children}
         </UserContext.Provider>
     )
+}
+
+export const GetUser = () => {
+    const { user } = useContext(UserContext)
+    return user
 }
 
 export default AuthComponent

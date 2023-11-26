@@ -17,4 +17,6 @@ router.delete('/document/:id', documentController.deleteDocument)
 router.patch('/:id', projectController.updateProject)
 router.patch('/addlink/:id', projectController.addLinkToProject)
 router.patch('/deletelink/:id', projectController.deleteLinkFromProject)
+router.patch('/addmember/:id', projectController.addMemberToProject)
+router.patch('/kickmember/:id', projectController.kickMemberFromProject)
 module.exports = router

@@ -5,7 +5,7 @@ const userController = require('../controllers/userController')
 const {isAuthenticated, signup} = require('../middleware')
 const {v4: uuidv4} = require('uuid')
 const { User } = require('../models')
-const myMulter = require('../routes/storage')
+const myMulter = require('./storage')
 
 router.get('/', (req, res) => {
     res.send({
@@ -17,8 +17,10 @@ router.post('/login', userController.login)
 router.post('/forgotpassword', userController.forgotpassword)
 router.put('/resetpassword/:resetToken', userController.resetpassword)
 router.get('/dash', isAuthenticated, userController.findByID)
-router.get('/:name', userController.getUserByName)
-router.get('/all/:name', userController.getUsersByName)
+router.get('/:id', userController.getUserById)
+router.get('/follow/:id', userController.getFollowById)
+router.get('/follower/:id', userController.getFollowerById)
+router.get('/name/:name', userController.getUserByName)
 router.patch('/follow', userController.followUser)
 router.patch('/unfollow', userController.unfollowUser)
 

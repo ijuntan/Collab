@@ -10,5 +10,7 @@ router.get('/', (req, res) => {
 router.get('/:id', commentController.getComment)
 router.post('/', commentController.createComment)
 router.delete('/:id', commentController.deleteComment)
-router.patch('/:id', commentController.updateComment)
+router.put('/:id', commentController.updateComment)
+router.patch('/action', commentController.updateActionComment)
+router.get('/action/:uid/:id', commentController.getActionCommentById);
 module.exports = router

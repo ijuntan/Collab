@@ -4,9 +4,28 @@ const myMulter = require('../routes/storage')
 module.exports = {
     async getPost(req, res) {
         try {
-            //const posts = await Post.aggregate([{$sample: {size: 10}}])
-            const posts = await Post.find({}).populate("createdBy", "username profilePic")
-            //console.log(posts)
+            const posts = await Post.aggregate([
+                {$sample: {size: 4 + parseInt(req.query.skip)}}, 
+                {$skip: parseInt(req.query.skip)}, 
+                {$lookup: {
+                    from: "users",
+                    localField: "createdBy",
+                    foreignField: "_id",
+                    as: "createdBy"
+                }}, 
+                {$unwind: "$createdBy"},
+                {$project: {
+                    "createdBy.password": 0,
+                    "createdBy.email": 0,
+                    "createdBy.createdAt": 0,
+                    "createdBy.updatedAt": 0,
+                    "createdBy.follows": 0,
+                    "createdBy.followed": 0,
+                    "createdBy.__v": 0
+                }}
+            ])
+            //const posts = await Post.find({}).populate("createdBy", "username profilePic").skip(parseInt(req.query.skip)).limit(6).sort({createdAt:-1})
+            //posts.forEach(post=>console.log(post.name));
             res.status(200).send(posts)
         } catch(error) {
             res.status(400).send(error)
@@ -64,10 +83,11 @@ module.exports = {
     async updatePost(req, res) {
         try {
             const {id} = req.params
-            const res = await Post.findOneAndUpdate({_id: id}, {...req.body})
+            const result = await Post.findOneAndUpdate({_id: id}, {...req.body})
             res.status(200).send(result)
         }
         catch(error) {
+            console.log(error)
             res.status(400).send(error)
         }
     },
@@ -82,10 +102,12 @@ module.exports = {
             }
             const res1 = await Post.deleteOne({_id: id})
             const res2 = await Comment.deleteMany({postId: id})
+            const res3 = await Action.deleteMany({to: id})
             
-            await Promise.all([res1, res2]).then((result)=>res.status(200).send(result))
+            await Promise.all([res1, res2, res3]).then((result)=>res.status(200).send(result))
         }
         catch(error) {
+            console.log(error)
             res.status(400).send(error)
         }
     },
@@ -112,6 +134,17 @@ module.exports = {
             const actionList = await Action.find({accountID: id}, "to action")
 
             res.status(200).send(actionList)
+        } catch(error) {
+            res.status(400).send(error)
+        }
+    },
+
+    async getActionUserPost(req, res) {
+        try {
+            const {uid, pid} = req.params
+            const action = await Action.find({accountID: uid, postID: pid}, "action")
+
+            res.status(200).send(action)
         } catch(error) {
             res.status(400).send(error)
         }

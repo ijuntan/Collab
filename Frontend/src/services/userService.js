@@ -8,10 +8,7 @@ const userService = {
         return axios.get(API_URL + '/dash', { header: authHeader() })
     },
     getUserByName(name) {
-        return axios.get(API_URL + `/${name}`)
-    },
-    getUsersByName(name) {
-        return axios.get(API_URL + `/all/${name}`)
+        return axios.get(API_URL + `/name/${name}`)
     },
     followFriend(selfName, friendName) {
         return axios.patch(API_URL + `/follow`, {selfName: selfName, friendName: friendName})

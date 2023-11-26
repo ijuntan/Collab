@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User, Notification } = require('../models')
+const { User, Notification, Project, Post } = require('../models')
 const sendEmail = require('../services/sendEmail');
 const crypto = require('crypto')
 require('dotenv').config();
@@ -34,7 +34,7 @@ module.exports = {
             const {selfName, friendName} = req.body
             const self = await User.findOneAndUpdate({_id: selfName}, {$pull: {follows: friendName}})
             const friend = await User.findOneAndUpdate({_id: friendName}, {$pull: {followed: selfName}})
-
+            
             Promise.all([self, friend]).then(() => {
                 return res.status(200).send({msg: 'Success'})
             })
@@ -46,23 +46,61 @@ module.exports = {
     async getUserByName(req, res) {
         try {
             const {name} = req.params
-            const user = await User.findOne({username: name}).select("-password").populate("follows")
+            const user = await User.findOne({username: name}).select("-password")
+                                    .populate("follows")
+            const post = await Post.find({createdBy: user._id}).sort({createdAt: -1}).limit(3)
+            const project = await Project.find({createdBy: user._id}).sort({createdAt: -1}).limit(3)
 
-            return res.status(200).send(user)
+            const data = {
+                ...user.toObject(),
+                post: [...post],
+                project: [...project]
+            }
+            return res.status(200).send(data)
+        }
+        catch(err) {
+            return res.status(500).send({error: err})
+        }
+    },
+    async getFollowById(req, res) {
+        try {
+            const {id} = req.params
+            const data = await User.findOne({_id: id}, "follows").populate("follows", "username profilePic")
+            
+            return res.status(200).send(data)
         }
         catch(err) {
             return res.status(500).send({error: "Get Error"})
         }
     },
-
-    async getUsersByName(req, res) {
+    async getFollowerById(req, res) {
         try {
-            const {name} = req.params
-            const users = await User.find({username: name}).select("-password")
-
-            return res.status(200).send(users)
+            const {id} = req.params
+            const data = await User.findOne({_id: id}, "followed").populate("followed","-password")
+            
+            return res.status(200).send(data)
         }
         catch(err) {
+            return res.status(500).send({error: "Get Error"})
+        }
+    },
+    async getUserById(req, res) {
+        try {
+            const {id} = req.params
+            const user = await User.findOne({_id: id}).select("-password").populate("follows")
+            const post = await Post.find({createdBy: user._id}).sort({createdAt: -1}).limit(3).select("name content")
+            const project = await Project.find({createdBy: user._id}).sort({createdAt: -1}).limit(3).select("name content")
+            
+            const data = {
+                ...user.toObject(),
+                post: [...post],
+                project: [...project]
+            }
+            return res.status(200).send(data)
+        }
+        catch(err) {
+            
+            console.log(err)
             return res.status(500).send({error: "Get Error"})
         }
     },
