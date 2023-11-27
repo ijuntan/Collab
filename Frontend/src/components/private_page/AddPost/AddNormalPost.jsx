@@ -176,7 +176,7 @@ const AddNormalPost = ({
                 }
                 
                 <button className={`
-                    ${!post.imageUrl && "hidden"}
+                    ${!imageURL && "hidden"}
                     bg-red-300 text-sm text-red-800
                     rounded-lg px-4 py-2 mt-2 ${post.tagQuestion && 'font-bold underline'}
                     hover:bg-red-400 hover:shadow-3

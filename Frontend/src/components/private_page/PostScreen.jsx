@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react'
-import { useOutletContext, useNavigate, useLocation } from 'react-router-dom'
+import React, { useState, useEffect, useMemo, Suspense, lazy } from 'react'
+import { useOutletContext, useNavigate, useParams } from 'react-router-dom'
 import PostService from '../../services/postService'
 import CommentService from '../../services/commentService'
 import { 
@@ -8,36 +8,23 @@ import {
     MdThumbUpOffAlt as Like,
     MdThumbDownOffAlt as Dislike,
     MdKeyboardArrowLeft as Left,
-    MdAccountCircle as Account,
     MdReply as Reply,
     MdDelete,
     MdEdit,
+    MdArrowRight,
 }
 from 'react-icons/md'
+import DateFormat from '../../utils/DateFormat'
+import ProfilePic from '../../utils/ProfilePic'
+import Loading from '../../utils/Loading'
+const EditPost = lazy(() => import('./EditPage/EditPost'))
 
 const sortCat = [
     "Hot",
     "Newest",
 ]
 
-const dateDiff = (createdAt) => {
-    const now = new Date()
-    const postDate = new Date(createdAt)
-    const diff = Math.floor((now - postDate)/ (1000 * 3600 * 24))
-    let text = ""
-
-    if(diff < 1) text="Today"
-    else if(diff > 30) text= Math.floor(diff/30) + " Months Ago"
-    else text= diff + " Days Ago"
-
-    return(
-        <div className='text-slate-500 text-xs mt-1'>
-            {text}
-        </div>
-    )
-}
-
-const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteComment}) => {
+const CommentReply = ({user, parentId, comment, ReplyButton, inAction, doAction, deleteComment}) => {
     const parentComment = comment.filter(item => item.parent === parentId)
     return(
         <div className='flex flex-col gap-2'>
@@ -47,7 +34,7 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
                     key={parent._id}
                     className="
                         flex flex-col bg-white p-2 rounded-lg gap-2 
-                        border border-slate-800
+                        border
                     "
                 >
                     <div  
@@ -55,9 +42,12 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
                         flex items-center bg-white rounded-lg gap-2
                         "
                     >
-                        <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
-                        {parent.createdBy.username} 
-                        {dateDiff(parent.createdAt)}
+                        <ProfilePic src={parent.createdBy.profilePic}/>
+                        
+                        <div className="flex flex-col">
+                            <div>{parent.createdBy.username}</div>
+                            <DateFormat date={parent.createdAt} color="text-gray-700"/>
+                        </div>
                         {
                             parent?.createdBy._id === user._id &&
                             <div className='flex grow justify-end'>
@@ -74,25 +64,32 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
                         {parent.content}
                     </div>
 
-                    <div className="flex gap-2 border-t-1">
+                    <div className="flex items-center gap-2 border-t-1">
                             <button className={`
                                 text-xl p-2 rounded-lg hover:bg-slate-300
                                 ${inAction(parent._id, "Like")?'text-green-600':'text-black'}
                             `}
-                            //onClick={() => actionPost(parent._id, "Like")}
-                            
+                            onClick={() => doAction(parent._id, "Comment", "Like")}
                             >
                                 <Like/>
                             </button>
+
+                            <div>
+                                {parent?.like || 0}
+                            </div>
 
                             <button className={`
                                 text-xl p-2 rounded-lg hover:bg-slate-300
                                 ${inAction(parent._id, "Dislike")?'text-red-600':'text-black'}
                             `}
-                            //onClick={() => actionPost(parent._id, "Dislike")}
+                            onClick={() => doAction(parent._id, "Comment", "Dislike")}
                             >
                                 <Dislike/>
                             </button>
+
+                            <div>
+                                {parent?.dislike || 0}
+                            </div>
 
                             <ReplyButton parentComment={parent}/>
                     </div>
@@ -103,6 +100,7 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
                     ReplyButton={ReplyButton} 
                     inAction={inAction}
                     user={user} 
+                    doAction={doAction}
                     deleteComment={deleteComment}
                     />
                 </div>
@@ -114,21 +112,34 @@ const CommentReply = ({comment, parentId, ReplyButton, inAction, user, deleteCom
 
 const PostScreen = () => {
     const { user } = useOutletContext()
+
     const [post, setPost] = useState(null)
     const [comment, setComment] = useState(null)
+
     const [action, setAction] = useState([])
+
     const [sort, setSort] = useState("")
     const [content, setContent] = useState("")
-    const { pathname } = useLocation()
-    const history = useNavigate()
+
+    const [showEditPost, setShowEditPost] = useState(false)
+
+    const { id } = useParams()
+
+    const navigate = useNavigate()
     
-    const updateAction = (postId, act, beforeAct) => {
-        const newActionState = action.map(obj => 
-            obj.to === postId
-            ? {...obj, action: act}
-            : obj
-        );
-        setAction(newActionState)
+    const updateActionLocally = (targetId, to, act, beforeAct) => {
+        if(!action?.some(e => e.to === targetId)) {
+            const newActionState = [...action, {accountID: user._id, to: targetId, actionTo:"Post", action: act}]
+            setAction(newActionState)
+        }
+        else {
+            const newActionState = action.map(obj =>
+                obj.to === targetId
+                ? {...obj, action: act}
+                : obj
+            )
+            setAction(newActionState)
+        }
         
         let linc = 0, dinc = 0;
         if(beforeAct === "Like") {
@@ -144,46 +155,68 @@ const PostScreen = () => {
             dinc = act === "Dislike" ? 1 : 0
         } 
 
-        const newPostState = {...post, like: post.like + linc, dislike: post.dislike + dinc}
+        if(to === "Post") {
+            const newPostState = {...post, like: post.like + linc, dislike: post.dislike + dinc}
 
-        setPost(newPostState)
+            setPost(newPostState)
+        }
+        else {
+            const newCommentState = comment.map(obj =>
+                obj._id === targetId
+                ? {...obj, like: obj.like + linc, dislike: obj.dislike + dinc}
+                : obj
+            )
+            setComment(newCommentState)
+        }
+        
     }
 
-    const actionPost = async(postId, actionType) => {
+    const doAction = async(targetId, to, actionType) => {
         try {
-            if(!action.some(e => e.to === postId)) {
-                const act = {
+            if(!action.some(e => e.to === targetId)) {
+                const actionToSubmit = {
                     accountID: user._id,
-                    to: postId,
-                    actionTo: "Post",
+                    to: targetId,
+                    actionTo: to,
                     action: actionType
                 }
-                await PostService.actionToPost(act)
 
-                updateAction(postId, actionType, "")
-            }
-            else {
-                const act = action.find(e => e.to === postId)
-                if(act.action !== actionType || act.action === "" ) {
-                    const wait = await PostService.updateActionPost({
-                        userID: user._id, 
-                        postID: postId, 
-                        act: actionType,
-                        beforeAct: act.action
-                    })
-
-                    if(wait) updateAction(postId, actionType, act.action)
+                if(to === "Post") {
+                    await PostService.actionToPost(actionToSubmit)
                 }
                 else {
-                    const wait = await PostService.updateActionPost({
+                    await CommentService.updateActionComment({
                         userID: user._id, 
-                        postID: postId, 
-                        act: "",
+                        commentID: targetId, 
+                        act: actionType,
+                        beforeAct: ""
+                    })
+                }
+                
+                updateActionLocally(targetId, to, actionType, "")
+            }
+            else {
+                const act = action.find(e => e.to === targetId)
+                const actionTypeToSubmit = (act.action === "None" || act.action !== actionType) ? actionType : "None";
+
+                if(to === "Post") {
+                    await PostService.updateActionPost({
+                        userID: user._id, 
+                        postID: targetId, 
+                        act: actionTypeToSubmit, 
                         beforeAct: act.action
                     })
-
-                    if(wait) updateAction(postId, "", act.action)
                 }
+                else {
+                    await CommentService.updateActionComment({
+                        userID: user._id, 
+                        commentID: targetId, 
+                        act: actionTypeToSubmit, 
+                        beforeAct: act.action
+                    })
+                }
+
+                updateActionLocally(targetId, to, actionTypeToSubmit, act.action)
             }
     
         } catch(err) {
@@ -197,7 +230,7 @@ const PostScreen = () => {
 
     const fetchPost = async() => {
         try {
-            const promise = await PostService.getPostById(pathname.split('/')[3])
+            const promise = await PostService.getPostById(id)
             setPost(promise.data)
         } catch(err) {
             console.log(err.data.response.error)
@@ -206,7 +239,7 @@ const PostScreen = () => {
 
     const fetchComment = async() => {
         try {
-            const promise = await CommentService.getComment(pathname.split('/')[3])
+            const promise = await CommentService.getComment(id)
             setComment(promise.data)
         } catch(err) {
             console.log(err.data.response.error)
@@ -259,7 +292,7 @@ const PostScreen = () => {
     const deletePost = async() => {
         try {
             const success = await PostService.deletePost(post._id)
-            if(success) history('/dash')
+            if(success) navigate('/dash')
         }
         catch(err) {
             console.log(err)
@@ -276,27 +309,20 @@ const PostScreen = () => {
         }
     }
 
-    const editPost = async() => {
-        try {
-            // const success = await PostService.updatePost(post._id, )
-            // if(success) history('/dash')
-        }
-        catch(err) {
-            console.log(err)
-        }
-    }
-
     const ReplyButton = ({parentComment}) => {
         const [showForm, setShowForm] = useState(false)
         const [commentContent, setCommentContent] = useState("")
         return(
             <>
             <button className="
-                text-xl p-2 rounded-lg hover:bg-slate-300 peer
+                flex items-center gap-1 text-xl text-gray-800 p-2 rounded-lg hover:bg-slate-300 peer
             "
                 onClick={() => setShowForm(prev => !prev)}
             >
                 <Reply/>
+                <div className='text-sm'>
+                    Reply
+                </div>
             </button>
 
             {
@@ -312,10 +338,10 @@ const PostScreen = () => {
                     placeholder="Comment.."
                     onChange = {e => setCommentContent(e.target.value)}
                 />
-                <button className='text-sm p-2 border rounded-lg'
+                <button className='text-2xl p-2 hover:bg-slate-300 rounded-lg'
                     onClick={()=>saveCommentToComment(parentComment, commentContent, setCommentContent, setShowForm)}
                 >
-                    submit
+                    <MdArrowRight/>
                 </button>
                 </>
             }
@@ -339,14 +365,27 @@ const PostScreen = () => {
         }
     }, [post])
 
-    const parentComment = useMemo(()=> comment?.filter(item => item.parent === null),[comment])
+    const handleComment = (comment) => {
+        const parentComments = comment?.filter(item => item.parent === null)
 
+        if(sort === sortCat[0]) {
+            return parentComments.sort((a, b) => (b.like - b.dislike) - (a.like - a.dislike))
+        }
+        else if(sort === sortCat[1]) {
+            return parentComments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        }
+
+        return parentComments
+    }
+    const parentComment = useMemo(()=> comment && handleComment(comment), [comment, sort])
+
+    if( post === null || comment === null) return (<Loading/>)
     return (
         <>
         <div className="grow"/>
         <div className="flex flex-col gap-4 w-70vw max-w-3xl py-5% h-full">
             <div className="flex justify-start">
-                <button className="flex gap-1 items-center" onClick={() => history(-1)}>
+                <button className="flex gap-1 items-center" onClick={() => navigate(-1)}>
                     <Left/>
                     BACK
                 </button>
@@ -355,23 +394,25 @@ const PostScreen = () => {
             <div className='
                 flex flex-col gap-4
                 rounded-lg bg-amber-700 
-                p-4 drop-shadow-lg
+                p-4 border
                 text-white font-bold' 
             >
                 <div className="
                     flex gap-2 items-center
                 ">
-                    <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={post?.createdBy.profilePic || "/images/profile.svg"}/>
-                    {post?.createdBy.username}
-                    {dateDiff(post?.createdAt)}
-                    
+                    <ProfilePic src={post?.createdBy?.profilePic}/>
+                        
+                    <div className="flex flex-col">
+                        <div>{post?.createdBy.username}</div>
+                        <DateFormat date={post?.createdAt}/>
+                    </div>
                     {
                         post?.createdBy._id === user._id &&
                         <div className='flex grow gap-2 justify-end'>
                             <button 
-                                onClick={editPost}
+                                onClick={() => setShowEditPost(true)}
                             >
-                                <MdEdit className='hover:text-green-400 text-xl'/>
+                                <MdEdit className='hover:text-gray-400 text-xl'/>
                             </button>
                             <button 
                                 onClick={deletePost}
@@ -383,39 +424,71 @@ const PostScreen = () => {
                 </div>
                 
                 <div className="
-                    flex gap-2
+                    flex flex-col gap-2
                 ">
-                    <div
-                        className="
-                            max-w-sm truncate
-                            font-medium text-lg
-                        "
-                    >
-                        {post?.name}
-                    </div>
-                    <div className={
-                        `${!(post?.tag !== "normal") && "hidden"}
-                            text-cream-200 border border-cream-200 px-2
-                            rounded-lg
-                        `
-                    }
-                    >
-                        {post?.tag}
+                    <div className='flex items-center gap-2'>
+                        {
+                            post?.tag !== "normal" && 
+                            {
+                                "question":
+                                <div className={`flex items-center bg-white px-2 rounded-full text-red-700`}>
+                                    Question
+                                </div>,
+                                "LFT":
+                                <div className={`flex items-center bg-white px-2 rounded-full text-gray-600`}>
+                                    Looking for team
+                                </div>,
+                                "LFM":
+                                <div className={`flex items-center bg-white px-2 rounded-full text-gray-600`}>
+                                    Looking for members
+                                </div>,
+                            }[post?.tag]
+                        }
+                        <div
+                            className="
+                                max-w-sm truncate
+                                font-medium text-xl
+                            "
+                        >
+                            {post?.name}
+                        </div>
                     </div>
                 </div>
             </div>
+                    
+            {
+                post?.category.length !== 0 &&
+                <div className='flex items-center font-medium gap-2'>
+                    <div>
+                        Category:
+                    </div>
+                    {
+                    post?.category.map(cat => (
+                        <div key={cat} className="
+                            text-black bg-white border px-2 py-1
+                            rounded-full
+                        ">
+                            {cat}
+                        </div>
+                    ))
+                    }
+                </div>
+            }
 
-            <div className='flex flex-col gap-4 rounded-lg bg-amber-200 text-slate-800 p-4 drop-shadow-lg whitespace-pre-line'>
-                {post?.content}
-                
-                <img src={post?.image} className='w-100 h-auto'/>
+
+            <div className='flex flex-col gap-4 rounded-lg bg-white rounded p-4 border'>
+                <div className='text-slate-600 whitespace-pre-line'>
+                    {post?.content}
+                </div>
+
+                <img src={post?.image} className='object-none'/>
 
                 <div className='flex items-center gap-2'>
                     <button className={`
-                        text-xl p-2 rounded-lg hover:bg-cream-500
+                        text-xl p-2 rounded-lg hover:bg-gray-200
                         ${inAction(post?._id, "Like")?'text-green-600':'text-black'}
                     `}
-                    onClick={() => actionPost(post?._id, "Like")}
+                    onClick={() => doAction(post?._id, "Post", "Like")}
                     
                     >
                         <Like/>
@@ -424,10 +497,10 @@ const PostScreen = () => {
                         {post?.like}
                     </div>
                     <button className={`
-                        text-xl p-2 rounded-lg hover:bg-cream-500
+                        text-xl p-2 rounded-lg hover:bg-gray-200
                         ${inAction(post?._id, "Dislike")?'text-red-600':'text-black'}
                     `}
-                    onClick={() => actionPost(post?._id, "Dislike")}
+                    onClick={() => doAction(post?._id, "Post", "Dislike")}
                     >
                         <Dislike/>
                     </button>
@@ -436,7 +509,8 @@ const PostScreen = () => {
                     </div>
                 </div>
             </div>
-
+            
+            {/* Add Comment */}
             <div className="flex gap-2 items-center">
                 <div className="font-bold mr-4">
                     Comments
@@ -469,7 +543,7 @@ const PostScreen = () => {
                 </button>
             </div>
             
-            <div className="flex flex-col drop-shadow-2xl border-black border-2 rounded-t-lg">
+            <div className="flex flex-col border rounded-lg">
                 <textarea 
                     className=" h-32 rounded-t-lg p-2 outline-none"
                     value={content}
@@ -484,7 +558,8 @@ const PostScreen = () => {
                     </button>
                 </div>
             </div>
-
+            
+            {/* Comment List */}
             <div className="flex flex-col gap-4">
                 <div className="border border-1 border-slate-700"/>
                 {
@@ -493,7 +568,7 @@ const PostScreen = () => {
                             key={parent._id}
                             className="
                                 flex flex-col bg-white p-2 rounded-lg gap-2 
-                                border border-slate-800
+                                border border-slate-400
                             "
                         >
                             <div  
@@ -501,9 +576,12 @@ const PostScreen = () => {
                                 flex items-center bg-white rounded-lg gap-2
                                 "
                             >
-                                <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={parent.createdBy.profilePic || "/images/profile.svg"}/>
-                                {parent.createdBy.username} 
-                                {dateDiff(parent.createdAt)}
+                                <ProfilePic src={parent?.createdBy?.profilePic}/>
+
+                                <div className="flex flex-col">
+                                    <div>{parent.createdBy.username}</div>
+                                    <DateFormat date={parent.createdAt} color="text-gray-700"/>
+                                </div>
 
                                 {
                                     parent?.createdBy._id === user._id &&
@@ -520,37 +598,49 @@ const PostScreen = () => {
                             <div>
                                 {parent.content}
                             </div>
-
-                            <div className="flex gap-2 border-t-1">
+                            
+                            <div className="flex gap-2 border-t-1 items-center">
                                     <button className={`
                                         text-xl p-2 rounded-lg hover:bg-slate-300
                                         ${inAction(parent._id, "Like")?'text-green-600':'text-black'}
                                     `}
-                                    //onClick={() => actionPost(parent._id, "Like")}
+                                    onClick={() => doAction(parent._id, "Comment", "Like")}
                                     
                                     >
                                         <Like/>
                                     </button>
 
+                                    <div>
+                                        {parent?.like || 0}
+                                    </div>
+
                                     <button className={`
                                         text-xl p-2 rounded-lg hover:bg-slate-300
                                         ${inAction(parent._id, "Dislike")?'text-red-600':'text-black'}
                                     `}
-                                    //onClick={() => actionPost(parent._id, "Dislike")}
+                                    onClick={() => doAction(parent._id, "Comment", "Dislike")}
                                     >
                                         <Dislike/>
                                     </button>
+
+                                    <div>
+                                        {parent?.dislike || 0}
+                                    </div>
 
                                     <ReplyButton parentComment={parent}/>
                             </div>
 
                             <CommentReply 
-                            comment={comment.filter(item => item.root === parent._id)} 
-                            parentId={parent._id} 
-                            ReplyButton={ReplyButton} 
-                            inAction={inAction} 
-                            user={user} 
-                            deleteComment={deleteComment}
+                                user={user}
+                                parentId={parent._id}  
+
+                                comment={comment.filter(item => item.root === parent._id)} 
+
+                                ReplyButton={ReplyButton}
+
+                                inAction={inAction} 
+                                doAction={doAction}
+                                deleteComment={deleteComment}
                             />
                         </div>
                     ))
@@ -558,6 +648,17 @@ const PostScreen = () => {
             </div>
         </div>
         <div className="grow"/>
+
+        {
+            showEditPost &&
+            <Suspense fallback={<Loading/>}>
+                <EditPost
+                    open={showEditPost} 
+                    handleClose={() => setShowEditPost(false)}
+                    inputPost={post}
+                />
+            </Suspense>
+        }
         </>
     )
 }

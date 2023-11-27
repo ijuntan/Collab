@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react'
 import PostService from '../../services/postService'
-import { UserContext } from '../../services/authComponent'
+import { GetUser, UserContext } from '../../services/authComponent'
 import { useNavigate } from 'react-router-dom'
 
 const Post = () => {
-    const {user} = useContext(UserContext)
-    const history = useNavigate()
+    const user = GetUser()
+    const navigate = useNavigate()
 
     const [posts, setPosts] = useState(null)
 
@@ -68,7 +68,7 @@ const Post = () => {
                                     <button className="
                                     flex gap-2 items-center
                                     "
-                                        onClick={() => history(`/dash/post/${item._id}`)}
+                                        onClick={() => navigate(`/dash/post/${item._id}`)}
                                     >
                                         {item.name}
                                         {dateDiff(item.createdAt)}
@@ -104,7 +104,7 @@ const Post = () => {
                     You have not created a post, 
                     <button
                         className='hover:text-amber-800'
-                        onClick={()=>history("/dash")}
+                        onClick={()=>navigate("/dash")}
                     >
                         go back and create a post first
                     </button>

@@ -28,6 +28,7 @@ const sortCat = [
 ]
 
 const DashboardContainer = () => {
+    const {searchContent} = useOutletContext()
     const [sort, setSort] = useState("")
 
     const [openAddPost, setOpenAddPost] = useState("")
@@ -152,7 +153,10 @@ const DashboardContainer = () => {
                     </div>
 
                     {/* Post  */}
-                    <DashboardMainFeed/>
+                    <DashboardMainFeed
+                        sort={sort}
+                        searchContent={searchContent}
+                    />
                 </div>
                 
                 <DashboardSidebar/>

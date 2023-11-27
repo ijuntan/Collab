@@ -153,6 +153,7 @@ module.exports = {
     async updateActionPost(req, res) {
         try {
             const {userID, postID, act, beforeAct} = req.body
+            console.log(userID, postID, act, beforeAct)
             const result = await Action.findOneAndUpdate({accountID: userID, to: postID}, {action: act})
             if(result) {
                 if(beforeAct === "Like") {
@@ -170,6 +171,7 @@ module.exports = {
             }
             res.status(200).send(result)
         } catch(error) {
+
             res.status(400).send(error)
         }
     },

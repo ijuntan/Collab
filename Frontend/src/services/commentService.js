@@ -15,6 +15,13 @@ const CommentService = {
     updateComment(id, content) {
         return axios.patch(`${API_URL}/${id}`, content)
     },
+
+    actionToComment(action) {
+        return axios.post(`${API_URL}/action`, action)
+    },
+    updateActionComment(act) {
+        return axios.patch(`${API_URL}/action`, act)
+    }
 }
 
 export default CommentService

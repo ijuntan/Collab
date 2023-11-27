@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { 
     MdThumbUpOffAlt as Like,
@@ -7,6 +7,9 @@ import {
     MdOutlinePersonSearch,
     MdQuestionMark,
     MdGroup,
+    MdCancel,
+    MdClose,
+    MdComment,
 }
 from 'react-icons/md'
 
@@ -19,8 +22,12 @@ import PostService from '../../../services/postService';
 import ProfilePic from '../../../utils/ProfilePic';
 import { GetUser } from '../../../services/authComponent';
 import Loading from '../../../utils/Loading';
+import { Popover } from '@headlessui/react';
 
-const DashboardMainFeed = () => {
+const DashboardMainFeed = ({
+    sort,
+    searchContent
+}) => {
     
     const user = GetUser()
 
@@ -47,14 +54,24 @@ const DashboardMainFeed = () => {
         else if(morePost)
             fetchMorePost()
     }
-    
+
+    const inAction = (id, act) => {
+        return action?.some(e => e.to === id && e.action === act)
+    }
+
     const updateAction = (postId, act, beforeAct) => {
-        const newActionState = action.map(obj => 
-            obj.to === postId
-            ? {...obj, action: act}
-            : obj
-        );
-        setAction(newActionState)
+        if(!action?.some(e => e.to === postId)) {
+            const newActionState = [...action, {accountID: user._id, to: postId, actionTo:"Post", action: act}]
+            setAction(newActionState)
+        }
+        else {
+            const newActionState = action.map(obj =>
+                obj.to === postId
+                ? {...obj, action: act}
+                : obj
+            )
+            setAction(newActionState)
+        }
         
         let linc = 0, dinc = 0;
         if(beforeAct === "Like") {
@@ -80,48 +97,36 @@ const DashboardMainFeed = () => {
 
     const actionPost = async(postId, actionType) => {
         try {
+            //Create New Action
             if(!action?.some(e => e.to === postId)) {
-                const act = {
+                const actionToSubmit = {
                     accountID: user._id,
                     to: postId,
                     actionTo: "Post",
                     action: actionType
                 }
-                await PostService.actionToPost(act)
+                await PostService.actionToPost(actionToSubmit)
 
-                updateAction(postId, actionType, "")
+                updateAction(postId, actionType, "None")
             }
+            //Update Action
             else {
                 const act = action.find(e => e.to === postId)
-                if(act.action !== actionType || act.action === "" ) {
-                    const wait = await PostService.updateActionPost({
-                        userID: user._id, 
-                        postID: postId, 
-                        act: actionType,
-                        beforeAct: act.action
-                    })
+                const actionTypeToSubmit = (act.action === "None" || act.action !== actionType) ? actionType : "None";
 
-                    if(wait) updateAction(postId, actionType, act.action)
-                }
-                else {
-                    const wait = await PostService.updateActionPost({
-                        userID: user._id, 
-                        postID: postId, 
-                        act: "",
-                        beforeAct: act.action
-                    })
+                await PostService.updateActionPost({
+                    userID: user._id, 
+                    postID: postId, 
+                    act: actionTypeToSubmit,
+                    beforeAct: act.action
+                })
 
-                    if(wait) updateAction(postId, "", act.action)
-                }
+                updateAction(postId, actionTypeToSubmit, act.action)
             }
     
         } catch(err) {
             console.log(err)
         }
-    }
-    
-    const inAction = (id, act) => {
-        return action?.some(e => e.to === id && e.action === act)
     }
 
     useEffect(() => {
@@ -145,6 +150,26 @@ const DashboardMainFeed = () => {
         };
     }, [])
 
+    const postsData = useMemo(() => {
+        if(searchContent === "") {
+            if(sort === "Hot") {
+                const newPosts = [...posts]
+                newPosts.sort((a, b) => (a.like - a.dislike) < (b.like - b.dislike) ? 1 : -1)
+                return newPosts
+            }
+            else if(sort === "New") {
+                const newPosts = [...posts]
+                newPosts.sort((a, b) => (a.createdAt < b.createdAt) ? 1 : -1)
+                return newPosts
+            }
+            return posts
+        }
+        return posts.filter(post => {
+            const content = post.name + " " + post.content
+            return content.toLowerCase().includes(searchContent.toLowerCase())
+        })
+    }, [posts, sort, searchContent])
+
     return (
         <InfiniteScroll
             dataLength={posts.length}
@@ -158,7 +183,7 @@ const DashboardMainFeed = () => {
             }
             className="flex flex-col gap-4"
         >
-            { posts && posts.map(item => (
+            { postsData && postsData.map(item => (
                 // Post Card
                 <div
                     key={item._id}
@@ -210,8 +235,10 @@ const DashboardMainFeed = () => {
                             }
                         </div>
 
-                        <div className='flex gap-2'>
-                            {
+                        {
+                            item.category.length !== 0 &&
+                            <div className='flex gap-2'>
+                                {
                                 item.category.map(cat => (
                                     <div key={cat} className="
                                         text-black bg-cream-200 px-2
@@ -220,8 +247,9 @@ const DashboardMainFeed = () => {
                                         {cat}
                                     </div>
                                 ))
-                            }
-                        </div>
+                                }
+                            </div>
+                        }
                     </button>
                     
                     {/* Content */}
@@ -240,15 +268,24 @@ const DashboardMainFeed = () => {
                         {item.content}
                     </div>
 
+                    {
+                        item.image &&
+                        <img
+                            src={item.image}
+                            className="p-2 object-scale-down w-full h-96 w-auto"
+                        />
+                    }
+
                     {/* Actions */}
                     <div className="
                         flex items-center gap-2
                         bg-white font-medium
                         px-4 py-2 rounded-b-lg
+                        text-gray-700
                     ">
                         <button className={`
                             text-2xl p-2 rounded-lg hover:bg-slate-300
-                            ${inAction(item._id, "Like")?'text-green-600':'text-black'}
+                            ${inAction(item._id, "Like")&&'text-green-600'}
                         `}
                         onClick={() => actionPost(item._id, "Like")}
                         
@@ -262,7 +299,7 @@ const DashboardMainFeed = () => {
 
                         <button className={`
                             text-2xl p-2 rounded-lg hover:bg-slate-300
-                            ${inAction(item._id, "Dislike")?'text-red-600':'text-black'}
+                            ${inAction(item._id, "Dislike")&&'text-red-600'}
                         `}
                         onClick={() => actionPost(item._id, "Dislike")}
                         >
@@ -273,12 +310,36 @@ const DashboardMainFeed = () => {
                             {item.dislike}
                         </div>
 
-                        <button className={`
-                            text-2xl p-2 rounded-lg hover:bg-slate-300
-                        `}
-                        //onClick={() => actionPost(item._id, "Dislike")}
+                        <Popover className="relative">
+                            {({ close }) => (
+                                <>
+                                <Popover.Button className={`
+                                    flex items-center gap-2 text-2xl p-2 rounded-lg hover:bg-slate-300
+                                `}
+                                //copy to clipboard
+                                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/dash/post/${item._id}`)}
+                                >
+                                    <Share/>
+                                    <span className='text-sm'>Share</span>
+                                </Popover.Button>
+
+                                <Popover.Panel className="flex items-center gap-2 absolute z-10 w-48 p-4 bg-white rounded-lg shadow-lg text-sm border">
+                                    <div>Copied to Clipboard!</div>
+                                    <button onClick={() => close()}>
+                                        <MdClose/>
+                                    </button>
+                                </Popover.Panel>
+                                </>
+                            )}
+                        </Popover>
+
+                        <button className='flex text-2xl items-center gap-2 rounded-lg hover:bg-slate-300 p-2'
+                        onClick={() => navigate(`post/${item._id}`)}
                         >
-                            <Share/>
+                            <MdComment/>
+                            <div className='text-sm'>
+                                Comment
+                            </div>
                         </button>
                     </div>
                 </div>
