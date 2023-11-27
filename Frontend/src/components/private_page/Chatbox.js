@@ -45,7 +45,7 @@ const Chatbox = ({
     }
 
     useEffect(()=>{
-        socket.current = io("ws://localhost:8000")
+        socket.current = io(process.env.REACT_APP_SOCKET_URL)
         socket.current.emit("addUser", account._id)
         socket.current.on("getMessage", data=> {
             setArrivalMessage({

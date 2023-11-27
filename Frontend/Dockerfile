@@ -1,6 +1,6 @@
 # We don't want to start from scratch.
 # That is why we tell node here to use the current node image as base.
-FROM node:18-alpine
+FROM node:18
 
 # Create an application directory
 RUN mkdir -p /app
@@ -18,11 +18,10 @@ RUN npm install
 COPY . .
 
 # Build the app
-ENV PORT=443
 ENV REACT_APP_END_URL=https://collab-ntust-backend-j27rktigzq-de.a.run.app
 
 RUN npm run build
 
-EXPOSE 443
+EXPOSE 4000
 
-CMD ["npm", "start"]
+CMD [ "npm", "run", "start" ]

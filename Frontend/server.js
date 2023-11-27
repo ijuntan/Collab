@@ -11,13 +11,12 @@ if(!process.env.PRODUCTION){
 app.use(express.static(path.join(__dirname, 'build')));
 
 // Handle SPA fallback (for routers like Vue Router in history mode)
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
+    console.log(__dirname)
+    console.log("index.html sent")
 });
 
-
-//const PORT = process.env.PORT || 443;
-const PORT = process.env.PORT
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+app.listen(4000, () => {
+    console.log(`Server is running on port 4000`);
 });
