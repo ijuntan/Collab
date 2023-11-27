@@ -18,10 +18,11 @@ RUN npm install
 COPY . .
 
 # Build the app
-ENV REACT_APP_END_URL=https://collab-ntust-backend-j27rktigzq-de.a.run.app
+ENV PORT=443
+ENV REACT_APP_SERVER_URL=https://collab-backend-j27rktigzq-de.a.run.app
 
 RUN npm run build
 
-EXPOSE 4000
+EXPOSE 443
 
-CMD [ "npm", "run", "start" ]
+CMD [ "npm", "run", "serve" ]
