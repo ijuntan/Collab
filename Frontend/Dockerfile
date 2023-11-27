@@ -24,3 +24,5 @@ ENV REACT_APP_END_URL=https://collab-ntust-backend-j27rktigzq-de.a.run.app
 RUN npm run build
 
 EXPOSE 443
+
+CMD ["npm", "start"]
