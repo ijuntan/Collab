@@ -37,7 +37,7 @@ const TextEditor = () => {
     }, [])
 
     useEffect(() => {
-        const s = io("ws://localhost:8000")
+        const s = io(process.env.REACT_APP_SOCKET_URL, {transports: ['websocket']})
         setSocket(s)
 
         return () => {
