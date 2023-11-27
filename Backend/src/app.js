@@ -14,9 +14,9 @@ if(!process.env.PRODUCTION){
 const app = express();
 
 //todo: adding whitelist
-app.use(cors({
-    origin: process.env.FRONTEND_URI 
-}));
+// app.use(cors({
+//     origin: process.env.FRONTEND_URI 
+// }));
 
 require('./services/passport')
 

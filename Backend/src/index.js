@@ -6,11 +6,7 @@ const documentController = require('../src/controllers/documentController')
 
 app.listen(PORT)
 
-const io = require("socket.io")(8000, {
-    cors: {
-        origin: process.env.FRONTEND_URI
-    }
-})
+const io = require("socket.io")(8000)
 
 let users = [];
 
