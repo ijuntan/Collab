@@ -1,18 +1,23 @@
-# tell which version node to use
-FROM node:18-alpine
+FROM node:18
 
-# app directory
+# Create an application directory
+RUN mkdir -p /app
+
+# The /app directory should act as the main application directory
 WORKDIR /app
 
-# copy package.json and package-lock.json
-COPY package*.json ./
+# Copy the app package and package-lock.json file
+COPY ./package*.json ./
 
-# install the dependencies
+# Install node packages
 RUN npm install
 
+# Copy or project directory (locally) in the current directory of our docker image (/app)
 COPY . .
 
-# expose port 5000
+#Expose PORT
 EXPOSE 5000
+EXPOSE 8000
 
+# Start the app
 CMD [ "npm", "start" ]

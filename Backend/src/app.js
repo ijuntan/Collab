@@ -7,15 +7,19 @@ const api = require('./routes');
 const { isAuthenticated } = require('./middleware');
 mongoose.set('strictQuery', true);
 
-require('dotenv').config();
+if(!process.env.PRODUCTION){
+    require("dotenv").config();
+}
 
 const app = express();
 
 //todo: adding whitelist
 app.use(cors({
-    origin:"http://localhost:3000"
+    origin: process.env.FRONTEND_URI 
 }));
+
 require('./services/passport')
+
 app.use(morgan('dev'));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -38,4 +42,5 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1', api)
 app.use(isAuthenticated)
+
 module.exports = app;
