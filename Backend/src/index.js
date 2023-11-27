@@ -1,14 +1,21 @@
 const app = require('./app');
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 
 const PORT = process.env.PORT;
 
 const documentController = require('../src/controllers/documentController')
 
-app.listen(PORT)
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*',
+    }
+});
 
-const io = require("socket.io")(8000, {
-    cors: "*"
-})
+httpServer.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 let users = [];
 
