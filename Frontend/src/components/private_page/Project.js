@@ -49,6 +49,12 @@ const Project = () => {
     }
 
     const createProject = async() => {
+        if(projectDialog.name === '') {
+            return alert('Please enter a name for the project')
+        }
+        if(projectDialog.desc === '') {
+            return alert('Please enter a description for the project')
+        }
         try {
             const projectFinal = {
                 name: projectDialog.name,
@@ -62,20 +68,6 @@ const Project = () => {
                 createdBy: user._id
             }
             const success = await ProjectService.createProject(projectFinal)
-            if(success) {
-                setOpenDialog(false)
-                fetchProject()
-            }
-        }
-        catch(err) {
-            console.log(err)
-            alert(err?.response?.data?.error)
-        }
-    }
-
-    const deleteProject = async(id) => {
-        try {
-            const success = await ProjectService.deleteProject(id)
             if(success) {
                 setOpenDialog(false)
                 fetchProject()
@@ -109,13 +101,6 @@ const Project = () => {
                                 <p className='font-bold'>
                                     {item.name}
                                 </p>
-                                <div className='flex grow justify-end'>
-                                    <button
-                                        onClick={()=>deleteProject(item._id)}
-                                    >
-                                        <MdDelete className='hover:text-red-400'/>
-                                    </button>
-                                </div>
                             </div>
                             
                             <p className='px-4 py-2 whitespace-pre border-b'>

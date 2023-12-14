@@ -1,12 +1,13 @@
 import React, {useRef, useState, useEffect} from 'react'
 import LoginForm from './LoginForm'
 import SignUpForm from './SignUpForm'
+import { useInView } from 'react-intersection-observer';
 
 const scroll = (ref) => {
   if(ref.current)
     window.scrollTo({
       top: ref.current.offsetTop == 0? 0 : ref.current.offsetTop + 80, 
-      left:0, 
+      left: 0, 
       behavior:'smooth'
     }) 
 }
@@ -31,11 +32,29 @@ const LandingHeader = (props) => {
     },
   ]
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 100);
+        };
+
+        // Set up the event listener
+        window.addEventListener('scroll', handleScroll);
+
+        // Clean up the event listener
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+        };
+    }, []);
+
   return (
-    <header ref={props.headerRef} className="
+    <header ref={props.headerRef} className={`
         flex justify-between items-center
-        p-4
-    ">
+        p-4 fixed z-50 w-full
+        transition-all duration-500 ease-in-out ${isScrolled ? 'bg-amber-800 shadow-lg' : ''}
+        ${props.color && 'bg-amber-950 shadow-none'}
+    `}>
       <img src = "images/collab.png" alt='logo' 
           className="
           h-14 ml-2 p-2
@@ -108,6 +127,12 @@ const LandingHero = () => {
 }
 
 const LandingFeature = (props) => {
+  const { ref, inView } = useInView({
+    /* Optional settings */
+    threshold: 0.5, // Trigger when 50% visible
+    triggerOnce: true // Trigger animation only once
+  });
+  
   const featureTitle = `What do we provide?`
   const featureContent = [
     {
@@ -155,9 +180,10 @@ const LandingFeature = (props) => {
         ">
 
           {featureContent.map(item => (
-            <div className="
+            <div ref={ref} className={`
               flex flex-col items-center gap-4 pb-20
-            " key={item.title}>
+              transition-all transform duration-500  ${inView ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}
+            `} key={item.title}>
               <img src={item.img} alt={item.title}
                 className="rounded-xl w-full max-h-72"
               />
@@ -262,25 +288,25 @@ const LandingTest = (props) => {
     {
       id: 0,
       name: "James Ardie",
-      text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      text: "This forum has been instrumental in the success of my projects. A great community for sharing and learning!",
       img: "images/user.svg"
     },
     {
       id: 1,
       name: "Junior Tanaya",
-      text: "Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      text: "I've learned so much about new technologies and trends here. It's an invaluable resource for tech enthusiasts!",
       img: "images/user.svg"
     },
     {
       id: 2,
-      name: "Bryan WikWik",
-      text: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      name: "Bryan Wikipedia",
+      text: "The insights and advice I got from fellow members helped me streamline my project workflows significantly.",
       img: "images/user.svg"
     },
     {
       id: 3,
       name: "Triyono Jaya",
-      text: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. ",
+      text: "The diverse range of topics and the expertise of community members make this forum a goldmine for project managers and enthusiasts alike!",
       img: "images/user.svg"
     },
   ]
@@ -418,6 +444,15 @@ function LandingPage() {
   const featureRef = useRef(null)
   const worksRef = useRef(null)
   const testimonialRef = useRef(null)
+
+  const [headerColor, setHeaderColor] = useState('')
+
+  const { ref: refWork, inView: inViewWork } = useInView({
+    /* Optional settings */
+    threshold: 0.5, // Trigger when 50% visible
+    triggerOnce: false // Trigger animation only once
+  });
+
   const [showFab, setShowFab] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [showLogin, setShowLogin] = useState(true)
@@ -431,26 +466,37 @@ function LandingPage() {
   
   useEffect(() => {
     window.addEventListener('scroll', listenScrollEvent);
-  });
+  }, []);
+
+  useEffect(() => {
+    if(inViewWork){
+      setHeaderColor('bg-amber-950')
+    }
+    else{
+      setHeaderColor('')
+    }
+  }, [inViewWork])
 
   return (
     <div className={`flex flex-col max-w-full overflow-hidden`}>
       
-      <div className={`
-      flex flex-col
-      drop-shadow-2xl
-      bg-hero bg-no-repeat bg-cover bg-fixed bg-center 
-      h-hero ${showForm && 'blur-none'}
-      `
-      }
-      >
-        <LandingHeader 
+      <LandingHeader 
           featureRef={featureRef} 
           worksRef={worksRef} 
           testimonialRef={testimonialRef} 
           headerRef={headerRef}
+          color={headerColor}
           openModal={openModal}
-        />
+      />
+
+      <div className={`
+        flex flex-col
+        drop-shadow-2xl
+        bg-hero bg-no-repeat bg-cover bg-fixed bg-center 
+        h-hero ${showForm && 'blur-none'}
+      `
+      }
+      >
 
         <LandingHero/>
         
@@ -458,7 +504,9 @@ function LandingPage() {
 
       <LandingFeature featureRef={featureRef} />
 
-      <LandingWork worksRef={worksRef} />
+      <div ref={refWork}>
+        <LandingWork worksRef={worksRef} />
+      </div>
 
       <LandingTest testimonialRef={testimonialRef} />
 

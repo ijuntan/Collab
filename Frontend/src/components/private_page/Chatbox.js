@@ -9,6 +9,7 @@ import {
 import ChatService from '../../services/chatService'
 import { UserContext } from '../../services/authComponent'
 import {io} from "socket.io-client"
+import ProfilePic from '../../utils/ProfilePic'
 
 const Chatbox = ({
     account,
@@ -99,19 +100,21 @@ const Chatbox = ({
     }
 
     return (
-        <div className="fixed flex flex-col bottom-0 right-10 h-1/2 w-2/6 rounded-t-lg bg-white">
+        <div className="fixed flex flex-col bottom-0 right-10 h-1/2 w-2/6 rounded-t-lg bg-white border">
             {/* Header */}
             <div className="flex bg-amber-800 p-2 items-center rounded-t-lg">
                 <div className="flex items-center gap-2">
-                    <img className='rounded-full w-10 h-10 bg-gray-200 object-cover' src={user.profilePic || "/images/profile.svg"}/>
-                    {user.username}
+                    <ProfilePic src={user.profilePic}/>
+                    <div className='text-white'>
+                        {user.username}
+                    </div>
                 </div>
 
                 <div className='flex justify-end grow'>
                     <button onClick={()=> {
                         setChatTo(null) 
                     }}>
-                        <Cancel/>
+                        <Cancel className='text-white'/>
                     </button>
                 </div>
             </div>
@@ -132,7 +135,10 @@ const Chatbox = ({
                                     : "bg-slate-200"
                                 }
                             `}>
-                                {item.message}
+                                <div className='whitespace-pre-wrap'>
+                                    {console.log(item.message)}
+                                    {item.message}
+                                </div>
                                 <DateDiff time={item.time}/>
                             </div>
                         </div>
@@ -153,7 +159,7 @@ const Chatbox = ({
                     value={text}
                     placeholder="Enter text..."
                     onChange = {e => setText(e.target.value)}
-                    //onKeyDown= {e => e.key==="Enter" && findFriend(friendFound)}
+                    onKeyDown= {e => (e.key==="Enter" && !e.shiftKey) && postMsg()}
                 />
                 <button className='flex items-center justify-center text-black rounded-xl w-10 hover:bg-slate-200'
                     onClick={postMsg}

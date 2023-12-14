@@ -59,7 +59,7 @@ const LoginForm = (props) => {
   
     return(
       <Transition show={props.showForm}>
-        <Dialog className="fixed inset-0" onClose={props.closeModal}>
+        <Dialog className="fixed inset-0 z-50" onClose={props.closeModal}>
           <div className="flex min-h-full items-center justify-center">
             <Transition.Child
               as={Fragment}
