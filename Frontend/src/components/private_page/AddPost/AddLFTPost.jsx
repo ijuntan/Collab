@@ -49,12 +49,14 @@ const AddLFTPost = ({
 
             const post_id = await PostService.createPost(postToSubmit)
             
-            if(post_id.status === 200) {
+            if(post_id.status === 200 && imageURL) {
                 const formData = new FormData();
                 formData.append('image', imageURL);
                 await PostService.uploadImage(formData, post_id.data)
-                handleClose()
             }
+
+            window.location.reload()
+            handleClose()
         }
         catch(err) {
             console.log(err)

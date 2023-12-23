@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import PostService from '../../../services/postService'
-import ProjectService from '../../../services/projectService'
+import React from 'react'
 
 import AddNormalPost from './AddNormalPost'
 import AddLFTPost from './AddLFTPost'
