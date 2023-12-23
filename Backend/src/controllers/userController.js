@@ -46,8 +46,11 @@ module.exports = {
     async getUserByName(req, res) {
         try {
             const {name} = req.params
-            const user = await User.findOne({username: name}).select("-password")
+            const user = await User.findOne({username: name, isVerified:true}).select("-password")
                                     .populate("follows")
+            if(!user) {
+                return res.status(400).send({error: "User not found"})
+            }
             const post = await Post.find({createdBy: user._id}).sort({createdAt: -1}).limit(3)
             const project = await Project.find({createdBy: user._id}).sort({createdAt: -1}).limit(3)
 
@@ -65,7 +68,7 @@ module.exports = {
     async getFollowById(req, res) {
         try {
             const {id} = req.params
-            const data = await User.findOne({_id: id}, "follows").populate("follows", "username profilePic")
+            const data = await User.findOne({_id: id, isVerified:true}, "follows").populate("follows", "username profilePic")
             
             return res.status(200).send(data)
         }
@@ -76,7 +79,7 @@ module.exports = {
     async getFollowerById(req, res) {
         try {
             const {id} = req.params
-            const data = await User.findOne({_id: id}, "followed").populate("followed","-password")
+            const data = await User.findOne({_id: id, isVerified:true}, "followed").populate("followed","-password")
             
             return res.status(200).send(data)
         }
@@ -87,7 +90,10 @@ module.exports = {
     async getUserById(req, res) {
         try {
             const {id} = req.params
-            const user = await User.findOne({_id: id}).select("-password").populate("follows")
+            const user = await User.findOne({_id: id, isVerified:true}).select("-password").populate("follows")
+            if(!user) {
+                return res.status(400).send({error: "User not found"})
+            }
             const post = await Post.find({createdBy: user._id}).sort({createdAt: -1}).limit(3).select("name content")
             const project = await Project.find({createdBy: user._id}).sort({createdAt: -1}).limit(3).select("name content")
             
@@ -104,22 +110,33 @@ module.exports = {
             return res.status(500).send({error: "Get Error"})
         }
     },
-
-    findByID: (req, res) => {
-        const {user} = req;
-        if(!user) {
-            return res.status(400).send('Server is having issues, please try again!');
-        }
-
-        return res.json(user)
-    },
-
     async signup(req, res) {
         try {
-            const user = await User.create(req.body)
+            const { email } = req.body;
+            const userFound = await User.findOne({email: email})
+            if(userFound) {
+                return res.status(400).send({error: "Account already exists"})
+            }
+
+            const emailToken = crypto.randomBytes(20).toString("hex");
+
+            const confirmUrl = `${process.env.FRONTEND_URI}/confirm/${emailToken}`
+
+            const message = `
+                <h1> Here is the confirmation link to your account! Beware on sharing this link. </h1>
+                <a href = ${confirmUrl} clicktracking = off> Confirm Email Link </a>
+            `;
+
+            sendEmail({
+                to: email,
+                subject: "Account confirmation",
+                text: message,
+            })
+
+            const user = await User.create({...req.body, emailToken, isVerified: false})
             const userObjJson = user.toJSON();
 
-            return res.send({user: userObjJson, token: jwtSignUser(userObjJson)})
+            return res.status(200).send({user: userObjJson, token: jwtSignUser(userObjJson)})
 
         } catch(error) {
             console.log(error)
@@ -129,7 +146,21 @@ module.exports = {
             return res.status(400).send({error: 'Something is wrong'})
         }
     },
-
+    async verifyEmail (req, res) {
+        try {
+            const { emailToken } = req.params;
+            const findToken = await User.findOne({emailToken: emailToken})
+            if(!findToken) {
+                return res.status(400).send({error: "Invalid Token"})
+            }
+            findToken.isVerified = true;
+            findToken.emailToken = undefined;
+            await findToken.save();
+            return res.status(200).send({success: true, data: "Email Verified"})
+        } catch (error) {
+            return res.status(500).send({error: "Verify email error"})
+        }
+    },
     async login(req, res) {
         try {
             const { username, password } = req.body;
@@ -139,6 +170,10 @@ module.exports = {
                 return res.status(400).send({error: "The login information is incorrect"})
             }
             
+            if(!user.isVerified) {
+                return res.status(400).send({error: "Please verify your email"})
+            }
+
             const isPasswordValid = await user.verifyPassword(password)
             if(!isPasswordValid){
                 return res.status(400).send({error: "The login information is incorrect"})
@@ -164,11 +199,11 @@ module.exports = {
             if(!user) {
                 return res.status(400).send({error: "No user with that email found!"})
             }
-            
+
             const resetToken = await user.getReset();
             await user.save();
 
-            const resetUrl = `http://localhost:3000/reset-password/${resetToken}`
+            const resetUrl = `${process.env.FRONTEND_URI}/reset-password/${resetToken}`
 
             const message = `
                 <h1> Here is the reset link to your account! Beware on sharing this link. </h1>
@@ -176,7 +211,7 @@ module.exports = {
             `;
             
             try {
-                await sendEmail({
+                sendEmail({
                     to: user.email,
                     subject: "Password Reset Request",
                     text: message,

@@ -1,11 +1,12 @@
 const nodemailer = require('nodemailer')
+require('dotenv').config()
 
 const sendEmail = (options) => {
     const transporter = nodemailer.createTransport({
         service: 'hotmail',
         auth: {
             user: process.env.EMAIL,
-            pass: process.env.PASS
+            pass: process.env.PASSWORD
         }
     })
 

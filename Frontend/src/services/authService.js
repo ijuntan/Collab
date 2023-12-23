@@ -17,6 +17,9 @@ const AuthService = {
     },
     resetpassword(resetToken, cred){
         return axios.put(`${API_URL}/resetpassword/${resetToken}`, cred)
+    },
+    verifyEmail(emailToken){
+        return axios.get(`${API_URL}/confirm/${emailToken}`)
     }
 }
 

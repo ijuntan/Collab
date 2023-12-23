@@ -4,9 +4,6 @@ import authHeader from './authHeader'
 const API_URL = "user"
 
 const userService = {
-    getUserDash() {
-        return axios.get(API_URL + '/dash', { header: authHeader() })
-    },
     getUserByName(name) {
         return axios.get(API_URL + `/name/${name}`)
     },
@@ -43,6 +40,7 @@ const userService = {
     uploadProfilePic(id, image) {
         return axios.post(API_URL + `/image/${id}`, image)
     }
+
 }
 
 export default userService

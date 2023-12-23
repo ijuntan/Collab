@@ -44,6 +44,7 @@ const SignUpForm = (props) => {
               password
           }
           const success = await AuthService.signup(user)
+          alert('Please check your email to verify your account')
           if(success) props.setShowLogin(true)
         }
         catch(error) {

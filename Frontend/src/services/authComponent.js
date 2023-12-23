@@ -2,7 +2,6 @@ import React, { useEffect, useContext, createContext, useState } from 'react'
 import { MainContext } from './MainContext'
 import { useNavigate } from 'react-router-dom'
 import userService from './userService'
-import AuthService from './authService'
 
 export const UserContext  = createContext()
 

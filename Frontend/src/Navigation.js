@@ -20,6 +20,8 @@ import Post from './components/private_page/Post'
 import TextEditor from './components/private_page/TextEditor'
 
 import DashboardContainer from './components/private_page/Dashboard/DashboardContainer'
+import VerifyEmail from './components/public_page/VerifyEmail'
+import Error404 from './components/public_page/Error404'
 
 const Navigation = () => {
     return (
@@ -28,7 +30,8 @@ const Navigation = () => {
                 <Route path="/" exact element = {<LandingPage/>} />
                 <Route path="forgot-password" exact element = {<ForgotPassword/>} />
                 <Route path="reset-password/:resetToken" element = {<ResetPassword/>} />
-                
+                <Route path="confirm/:emailToken" element = {<VerifyEmail/>} />
+                <Route path="error" element = {<Error404/>} />
                 <Route path="dash" element = {
                     <AuthComponent>
                         <PrivateScreen/>

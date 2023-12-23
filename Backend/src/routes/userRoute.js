@@ -16,14 +16,13 @@ router.post('/signup', signup, userController.signup)
 router.post('/login', userController.login)
 router.post('/forgotpassword', userController.forgotpassword)
 router.put('/resetpassword/:resetToken', userController.resetpassword)
-router.get('/dash', isAuthenticated, userController.findByID)
 router.get('/:id', userController.getUserById)
 router.get('/follow/:id', userController.getFollowById)
 router.get('/follower/:id', userController.getFollowerById)
 router.get('/name/:name', userController.getUserByName)
 router.patch('/follow', userController.followUser)
 router.patch('/unfollow', userController.unfollowUser)
-
+router.get('/confirm/:emailToken', userController.verifyEmail)
 router.post('/image/:id', myMulter.upload.single('image'), async (req, res) => {
     try {
       const file = myMulter.bucket.file(uuidv4() + "." + req.file.mimetype.split('/')[1]);

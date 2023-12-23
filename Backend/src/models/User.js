@@ -33,6 +33,8 @@ const UserSchema = new Schema({
         type: String,
         required: false
     },
+    isVerified: Boolean,
+    emailToken: String,
     resetPasswordToken: String,
     resetPasswordExpire: Date
 }, {
