@@ -168,5 +168,42 @@ module.exports = {
             console.log(err)
             res.status(404).send({msg: "Please try again!"})
         }
+    },
+
+    async leaveProject(req, res) {
+        try {
+            const proj = await Project.findOne({_id: req.params.proj_id})
+            if(req.params.user_id === proj.createdBy) {
+                res.status(401).send({msg: "You can't leave your own project!"})
+                return
+            }
+
+            if(!proj.members.some(mem => mem.member == req.params.user_id)) {
+                res.status(401).send({msg: "User not in project!"})
+                return
+            }
+
+            await Project.findOneAndUpdate({_id : req.params.proj_id}, {
+               $pull:{
+                    members: {
+                        member: req.params.user_id
+                    }
+               } 
+            })
+            
+            const user = await User.findOne({_id: req.params.user_id})
+
+            await Notification.create({
+                receiver: proj.createdBy,
+                msg: `${user.username} have left ${proj.name}!`,
+                isRead: false
+            })
+
+            res.status(200).send({msg: "User left!"})
+        }
+        catch(err) {
+            console.log(err)
+            res.status(404).send({msg: "Please try again!"})
+        }
     }
 }

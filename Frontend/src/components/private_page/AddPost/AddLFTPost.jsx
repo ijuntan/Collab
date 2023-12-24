@@ -26,14 +26,31 @@ const AddLFTPost = ({
         teamCat: []
     })
 
-    const [imageURL, setImageURL] = useState(null)
     const [category, setCategory] = useState([])
+    const [err, setErr] = useState("")
 
     const handlePost = (e) => {
         setPost(prev => ({...prev, [e.target.name]: e.target.value}))
     }
 
+    const validatePost = () => {
+        if(!post.name) {
+            setErr("Title cannot be empty")
+            return false
+        }
+        if(!post.desc) {
+            setErr("Description cannot be empty")
+            return false
+        }
+        if(!post.exp) {
+            setErr("Experience cannot be empty")
+            return false
+        }
+        return true
+    }
+
     const createPost = async() => {
+        if(!validatePost()) return
         try {
             const postToSubmit = {
                 name: post.name,
@@ -47,14 +64,8 @@ const AddLFTPost = ({
                 createdBy: user._id
             }
 
-            const post_id = await PostService.createPost(postToSubmit)
+            await PostService.createPost(postToSubmit)
             
-            if(post_id.status === 200 && imageURL) {
-                const formData = new FormData();
-                formData.append('image', imageURL);
-                await PostService.uploadImage(formData, post_id.data)
-            }
-
             window.location.reload()
             handleClose()
         }
@@ -239,7 +250,14 @@ const AddLFTPost = ({
                     onChange = {e => handlePost(e)}
                 />
             </div>
-
+            
+            {
+                err && 
+                <div className="mt-2 text-red-500">
+                    {err}
+                </div>
+            }
+            
             <div className="flex gap-2 mt-4">
                 <button
                     type="button"

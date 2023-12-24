@@ -19,4 +19,5 @@ router.patch('/addlink/:id', projectController.addLinkToProject)
 router.patch('/deletelink/:id', projectController.deleteLinkFromProject)
 router.patch('/addmember/:id', projectController.addMemberToProject)
 router.patch('/kickmember/:id', projectController.kickMemberFromProject)
+router.patch('/leave/:proj_id/:user_id', projectController.leaveProject)
 module.exports = router

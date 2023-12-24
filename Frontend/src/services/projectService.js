@@ -33,9 +33,13 @@ const ProjectService = {
         return axios.delete(`${API_URL}/document/${id}`)
     },
 
-    inviteMember(id, content) {
-        return axios.patch(`${API_URL}/invite/${id}`, content)
-    } 
+    kickMember(id, content) {
+        return axios.patch(`${API_URL}/kickmember/${id}`, content)
+    },
+
+    leaveProject(proj_id, user_id) {
+        return axios.patch(`${API_URL}/leave/${proj_id}/${user_id}`)
+    }
 }
 
 export default ProjectService

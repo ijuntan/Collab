@@ -29,6 +29,7 @@ const AddNormalPost = ({
     })
     const [imageURL, setImageURL] = useState(null)
     const [category, setCategory] = useState([])
+    const [err, setErr] = useState("")
 
     const openLFTButton = () => {
         setOpen("LFT")
@@ -46,7 +47,20 @@ const AddNormalPost = ({
         setOpen("")
     }
 
+    const validatePost = () => {
+        if(!post.name) {
+            setErr("Title cannot be empty")
+            return false
+        }
+        if(!post.desc) {
+            setErr("Description cannot be empty")
+            return false
+        }
+        return true
+    }
+
     const createPost = async() => {
+        if(!validatePost()) return
         try {
             const postToSubmit = {
                 name: post.name,
@@ -234,12 +248,20 @@ const AddNormalPost = ({
                         accept="image/*"
                         onChange= {e => {
                             const file = e.target.files[0]
-                            setImageURL(new Blob([file], { type: file.type }))
+                            if(file.size > 1024*1024*1) return alert("File size cannot exceed 1MB")
+                            else setImageURL(new Blob([file], { type: file.type }))
                         }}
                     />
                 </div>
             </div>
-
+            
+            {
+                err && 
+                <div className="mt-2 text-red-500">
+                    {err}
+                </div>
+            }
+            
             <div className="mt-4">
                 <button
                     className="

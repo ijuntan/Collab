@@ -1,7 +1,7 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react'
 import Loading from './Loading'
 
-import { MdAccountCircle, MdAddCircle, MdClose, MdDelete, MdDragIndicator, MdEdit, MdOutlinePerson, MdPersonAdd, MdShare } from 'react-icons/md'
+import { MdAccountCircle, MdAddCircle, MdClose, MdDelete, MdDoorBack, MdDragIndicator, MdEdit, MdOutlinePerson, MdPersonAdd, MdShare } from 'react-icons/md'
 import { SiDiscord, SiFacebook, SiGithub, SiGitlab, SiLinkedin, SiSlack, SiTwitter } from 'react-icons/si'
 
 import { Dialog, Popover, Transition } from '@headlessui/react'
@@ -485,6 +485,24 @@ const ProjectPage = () => {
         }
     }
 
+    const leaveProject = async(proj_id) => {
+        try {
+            await ProjectService.leaveProject(proj_id, user._id)
+            navigate('/dash')
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
+    const kickMember = async(user_id) => {
+        try {
+            await ProjectService.kickMember(project._id, {memberId: user_id})
+            fetchProject()
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
     useEffect(() => {
         fetchProject()
     }, [])
@@ -504,58 +522,62 @@ const ProjectPage = () => {
                     </div>
                 </div>
 
-                <div className='flex gap-2'>
-                    {
-                        [
-                            {
-                                name: "Edit",
-                                logo: <MdEdit/>,
-                                onclick: () => setOpenEdit(true)
-                            },
-                            {
-                                name: "Delete",
-                                logo: <MdDelete/>,
-                                onclick: () => deleteProject(project._id)
-                            },
-                        ].map(item =>
-                            <button
-                                key={item.name}
-                                onClick={item.onclick}
-                                className='flex items-center gap-2 border-black border p-2 transition hover:-translate-y-1 cursor-pointer'
-                            >
-                                <div>
-                                    {item.name}
-                                </div>
-                                {item.logo}
-                            </button>
-                        )
-                    }
-
-                    <Popover className="relative">
-                        {({ close }) => (
-                            <>
-                            <Popover.Button className={`
-                                flex items-center gap-2 border-black border p-2 transition hover:-translate-y-1 cursor-pointer
-                            `}
-                            //copy to clipboard
-                            onClick={() => navigator.clipboard.writeText(`${window.location.origin}/dash/project/${project._id}`)}
-                            >
-                                <div>
-                                    Share
-                                </div>
-                                <MdShare/>
-                            </Popover.Button>
-
-                            <Popover.Panel className="flex items-center gap-2 absolute z-10 w-48 p-4 bg-white rounded-lg shadow-lg text-sm border">
-                                <div>Copied to Clipboard!</div>
-                                <button onClick={() => close()}>
-                                    <MdClose/>
+                {
+                    isAdmin &&
+                    <div className='flex gap-2'>
+                        {
+                            [
+                                {
+                                    name: "Edit",
+                                    logo: <MdEdit/>,
+                                    onclick: () => setOpenEdit(true)
+                                },
+                                {
+                                    name: "Delete",
+                                    logo: <MdDelete/>,
+                                    onclick: () => deleteProject(project._id)
+                                },
+                            ].map(item =>
+                                <button
+                                    key={item.name}
+                                    onClick={item.onclick}
+                                    className='flex items-center gap-2 border-black border p-2 transition hover:-translate-y-1 cursor-pointer'
+                                >
+                                    <div>
+                                        {item.name}
+                                    </div>
+                                    {item.logo}
                                 </button>
-                            </Popover.Panel>
-                            </>
-                        )}
-                    </Popover>
-                </div>
+                            )
+                        }
+
+                        <Popover className="relative">
+                            {({ close }) => (
+                                <>
+                                <Popover.Button className={`
+                                    flex items-center gap-2 border-black border p-2 transition hover:-translate-y-1 cursor-pointer
+                                `}
+                                //copy to clipboard
+                                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/dash/project/${project._id}`)}
+                                >
+                                    <div>
+                                        Share
+                                    </div>
+                                    <MdShare/>
+                                </Popover.Button>
+
+                                <Popover.Panel className="flex items-center gap-2 absolute z-10 w-48 p-4 bg-white rounded-lg shadow-lg text-sm border">
+                                    <div>Copied to Clipboard!</div>
+                                    <button onClick={() => close()}>
+                                        <MdClose/>
+                                    </button>
+                                </Popover.Panel>
+                                </>
+                            )}
+                        </Popover>
+                    </div>
+                }
+                
 
                 <div className='flex border whitespace-pre-wrap bg-white p-4 h-3/5'>
                     {project.content}
@@ -575,7 +597,6 @@ const ProjectPage = () => {
                                 <MdAddCircle/>
                             </button>
                         }
-                        
                     </div>
 
                     {
@@ -624,6 +645,7 @@ const ProjectPage = () => {
                         project.document.length !== 0 &&
                         <div className='flex items-center gap-2 py-2'>
                             {
+                                project.members.find(member => member.member._id === user._id) &&
                                 project.document.map(item =>
                                     <div className='flex gap-2 border rounded p-2'>
                                         <button className='text-xl hover:text-gray-700' onClick={()=>navigate(`/dash/text/${item._id}`)}>
@@ -646,17 +668,31 @@ const ProjectPage = () => {
                 </div>
 
                 <div className='flex flex-col'>
+                    
                     <div className='flex z-10 rounded-lg bg-amber-600 p-4 drop-shadow-md'>
                         <div className='grow text-lg font-bold'>
                             Members
                         </div>
 
-                        <button className='hover:text-white duration-500 text-2xl'
-                            title="Invite a person"
-                            onClick={()=>setOpenInvite(true)}
-                        >
-                            <MdPersonAdd/>
-                        </button>
+                        {
+                            isAdmin &&
+                            <button className='hover:text-white duration-500 text-2xl'
+                                title="Invite a person"
+                                onClick={()=>setOpenInvite(true)}
+                            >
+                                <MdPersonAdd/>
+                            </button>
+                        }
+
+                        {
+                            project.members.find(member => member.member._id === user._id) && !isAdmin &&
+                            <button className='flex items-center text-white hover:text-red-800'
+                                onClick={() => leaveProject(project._id)}
+                            >
+                                <MdDoorBack/>
+                                Leave
+                            </button>
+                        }
                     </div>
 
                     <div className="bg-white p-4 pt-8 rounded-b-lg -translate-y-4 gap-2 flex flex-col border">
@@ -669,6 +705,13 @@ const ProjectPage = () => {
                                 <div className='font-bold'>
                                     {user.permission === "Admin" && user.permission}
                                 </div>
+                                {
+                                    isAdmin && user.permission !== "Admin" &&
+                                    <button className='hover:text-red-800'
+                                        onClick={() => kickMember(user.member._id)}>
+                                        <MdDelete/>
+                                    </button>
+                                }
                             </div>
                         ))}
                     </div>

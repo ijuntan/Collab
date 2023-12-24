@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 
 import { 
     MdThumbUpOffAlt as Like,
@@ -10,8 +10,11 @@ import {
     MdCancel,
     MdClose,
     MdComment,
+    MdLink,
 }
 from 'react-icons/md'
+
+import { Popover } from '@headlessui/react'
 
 import InfiniteScroll from 'react-infinite-scroll-component';
 
@@ -22,7 +25,8 @@ import PostService from '../../../services/postService';
 import ProfilePic from '../../../utils/ProfilePic';
 import { GetUser } from '../../../services/authComponent';
 import Loading from '../../../utils/Loading';
-import { Popover } from '@headlessui/react';
+import Chatbox from '../Chatbox'
+const UserProfile = lazy(() => import('../UserProfile'))
 
 const DashboardMainFeed = ({
     sort,
@@ -37,6 +41,11 @@ const DashboardMainFeed = ({
     const [morePost, setMorePost] = useState(true)
 
     const [action, setAction] = useState([])
+    const [chatTo, setChatTo] = useState(null)
+    const [userFound, setUserFound] = useState(null)
+    const handleCloseUserProfile = () => {
+        setUserFound(null)
+    }
 
     const fetchMorePost = async() => {
         const promise = await PostService.getPost(posts.length)
@@ -193,32 +202,38 @@ const DashboardMainFeed = ({
                     "
                 >
                     {/* Title */}
-                    <button className="
+                    <div className="
                         flex flex-col gap-2 bg-white
                         p-4 rounded-t-lg
                     "
-                    onClick={() => navigate(`post/${item._id}`)}
                     >
                         <div className="flex gap-2 items-center">
                             <ProfilePic src={item.createdBy.profilePic}/>
 
                             <div className='flex flex-col items-start'>
-                                <div className='text-black font-medium'>
+                                <button className='text-black font-medium hover:underline'
+                                    onClick={() => {
+                                        if(item.createdBy._id !== user._id)
+                                            setUserFound(item.createdBy)
+                                    }}
+                                >
                                     {item.createdBy.username}
-                                </div>
+                                </button>
                                 <DateFormat date={item.createdAt} color="text-slate-700"/>
                             </div>
                         </div>
                         
                         <div className="flex gap-2 items-center">
-                            <div
+                            <button
                                 className="
                                     max-w-sm truncate
                                     font-medium text-lg 
                                 "
+                                
+                                onClick={() => navigate(`post/${item._id}`)}
                             >
                                 {item.name}
-                            </div>
+                            </button>
 
                             {
                                 item.tag !== "normal" && 
@@ -232,6 +247,13 @@ const DashboardMainFeed = ({
                                     "LFM":
                                         <MdOutlinePersonSearch/>,
                                 }[item.tag]
+                            }
+
+                            {
+                                item.project &&
+                                <button className="text-slate-800 hover:text-green-700" onClick={() => navigate(`/dash/project/${item.project}`)}>
+                                    <MdLink/>
+                                </button>
                             }
                         </div>
 
@@ -250,20 +272,21 @@ const DashboardMainFeed = ({
                                 }
                             </div>
                         }
-                    </button>
+                    </div>
                     
                     {/* Content */}
 
                     <div
                         className="
-                            max-h-36 
-                            px-4 py-2 whitespace-pre
-                            text-slate-800
+                            max-h-36
+                            px-4 py-2 whitespace-pre-wrap
+                            text-slate-800 cursor-pointer
                         "
                         style={{
                             WebkitMaskImage: "linear-gradient(180deg, #000 60%, transparent)",
                             maskImage: "linear-gradient(180deg, #000 60%, transparent)"
                         }}
+                        onClick={() => navigate(`post/${item._id}`)}
                     >
                         {item.content}
                     </div>
@@ -341,6 +364,26 @@ const DashboardMainFeed = ({
                                 Comment
                             </div>
                         </button>
+                        {
+                            userFound &&
+                            <Suspense fallback={<Loading/>}>
+                                <UserProfile
+                                    userTarget={userFound}
+                                    open={userFound ? true : false}
+                                    handleClose={handleCloseUserProfile}
+                                    setChatTo={setChatTo}
+                                />
+                            </Suspense>
+                        }
+                        {
+                            chatTo &&
+                            <Chatbox
+                                open={chatTo ? true : false}
+                                account={user}
+                                user={chatTo}
+                                setChatTo={setChatTo}
+                            />
+                        }
                     </div>
                 </div>
             ))}
