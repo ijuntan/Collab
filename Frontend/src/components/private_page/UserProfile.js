@@ -47,7 +47,6 @@ const UserProfile = ({
     const alreadyFollow = () => {
         return user.follows.find(item => item._id === userTarget._id)
     }
-
     return (
         <TransitionDialog open={open} handleClose={handleClose}>
             <Dialog.Title
@@ -78,8 +77,8 @@ const UserProfile = ({
                     </div>
                     <div className="flex flex-col gap-2">
                         {   
-                        user.post.length !== 0 ?
-                        user.post.map(post => (
+                        userTarget.post.length !== 0 ?
+                        userTarget.post.map(post => (
                             <button className="flex flex-col gap-2 p-4 rounded-lg border"
                                 onClick={() => navigate(`/dash/post/${post._id}`)}
                             >
@@ -117,8 +116,8 @@ const UserProfile = ({
                     </div>
                     <div className="flex flex-col gap-2">
                         {
-                            user.project.length !== 0 ?
-                            user.project.map(project => (
+                            userTarget.project.length !== 0 ?
+                            userTarget.project.map(project => (
                                 <div className="flex flex-col gap-2 p-4 rounded-lg border">
                                     <div className="flex gap-2">
                                         <div className="flex flex-col gap-1">

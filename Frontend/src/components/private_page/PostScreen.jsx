@@ -446,7 +446,7 @@ const PostScreen = () => {
                         }
                         <div
                             className="
-                                max-w-sm truncate
+                                max-w-lg
                                 font-medium text-xl
                             "
                         >

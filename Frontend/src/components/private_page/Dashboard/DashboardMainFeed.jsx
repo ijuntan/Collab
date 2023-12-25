@@ -27,6 +27,7 @@ import { GetUser } from '../../../services/authComponent';
 import Loading from '../../../utils/Loading';
 import Chatbox from '../Chatbox'
 import { postCategory } from '../AddPost/category';
+import userService from '../../../services/userService';
 const UserProfile = lazy(() => import('../UserProfile'))
 
 const DashboardMainFeed = ({
@@ -47,6 +48,15 @@ const DashboardMainFeed = ({
     const handleCloseUserProfile = () => {
         setUserFound(null)
     }
+
+    const searchUsername = async(username) => {
+        try {
+            const res = await userService.getUserByName(username)
+            setUserFound(res.data)
+        } catch (err) {
+            console.log(err)
+        }
+    }    
 
     const fetchMorePost = async() => {
         const promise = await PostService.getPost(posts.length)
@@ -219,7 +229,7 @@ const DashboardMainFeed = ({
                                 <button className='text-black font-medium hover:underline'
                                     onClick={() => {
                                         if(item.createdBy._id !== user._id)
-                                            setUserFound(item.createdBy)
+                                            searchUsername(item.createdBy.username)
                                     }}
                                 >
                                     {item.createdBy.username}

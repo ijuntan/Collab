@@ -23,7 +23,7 @@ const AddLFTPost = ({
         desc: "",
         tagQuestion: false,
         exp: "",
-        teamCat: []
+        teamCat: [],
     })
 
     const [category, setCategory] = useState([])
@@ -34,10 +34,6 @@ const AddLFTPost = ({
     }
 
     const validatePost = () => {
-        if(!post.name) {
-            setErr("Title cannot be empty")
-            return false
-        }
         if(!post.desc) {
             setErr("Description cannot be empty")
             return false
@@ -53,7 +49,7 @@ const AddLFTPost = ({
         if(!validatePost()) return
         try {
             const postToSubmit = {
-                name: post.name,
+                name: `I am looking for ${post.teamCat.map(item => teamCategory.find(o => o.value === item).placeholder).join(", ")} team for ${category.join(", ")}`,
                 content: 
                 `${post.desc}\nHere's my experience:\n${post.exp}`,
                 category: category,
