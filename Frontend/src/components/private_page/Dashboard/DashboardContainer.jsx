@@ -19,6 +19,8 @@ import Loading from '../../../utils/Loading'
 import DashboardMainFeed from './DashboardMainFeed'
 import DateFormat from '../../../utils/DateFormat'
 import DashboardSidebar from './DashboardSidebar'
+import { Menu } from '@headlessui/react'
+import { postCategory } from '../AddPost/category'
 
 const AddPostNavigation = lazy(() => import('../AddPost/AddPostNavigation'))
 
@@ -140,14 +142,43 @@ const DashboardContainer = () => {
                                 ))
                             }
                             <div className="flex grow justify-end">
-                                <button className="
-                                    flex items-center p-2 rounded-lg
-                                    text-white font-medium
-                                    hover:bg-amber-800
-                                ">
-                                    Filter
-                                    <Down/>
-                                </button>
+                                {
+                                    sort &&
+                                    <button className="hover:opacity-50"
+                                        onClick={() => setSort("")}
+                                    >
+                                        <MdCancel/>
+                                    </button>
+                                }
+                                <Menu>
+                                    {({open}) => (
+                                    <div className='relative'>
+                                    <Menu.Button
+                                        className={`flex items-center gap-2 p-2 rounded-lg outline-none transition-all delay-100 ${open ? "bg-gray-100" : ""}`}
+                                    >
+                                        {sort ? sort : "Filter"}
+                                        <Down/>
+                                    </Menu.Button>
+
+                                    <Menu.Items className="absolute top-12 right-1 bg-white outline-none border rounded-lg flex flex-col max-h-44 overflow-auto">
+                                        {
+                                            postCategory.map(item => (
+                                                <Menu.Item key={item}>
+                                                        <button className={`
+                                                            flex items-center justify-center gap-2 p-2 rounded-lg
+                                                            hover:bg-gray-200
+                                                        `}
+                                                        onClick={()=> setSort(item)}
+                                                        >
+                                                            {item}
+                                                        </button>
+                                                </Menu.Item>
+                                            ))
+                                        }
+                                    </Menu.Items>
+                                    </div>
+                                    )}
+                                </Menu>
                             </div>
                         </div>
                     </div>

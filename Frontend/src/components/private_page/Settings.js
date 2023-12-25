@@ -76,9 +76,6 @@ const Settings = () => {
                     My Projects
                 </button>
 
-                <button className="w-full bg-amber-700 rounded-lg mt-4 py-2 px-10 text-white font-bold hover:bg-amber-800">
-                    Connect Social Link
-                </button>
                 <button onClick={logout} className="w-full bg-amber-700 rounded-lg mt-4 py-2 px-10 text-white font-bold hover:bg-amber-800">
                     Logout
                 </button>

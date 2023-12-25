@@ -26,6 +26,7 @@ import ProfilePic from '../../../utils/ProfilePic';
 import { GetUser } from '../../../services/authComponent';
 import Loading from '../../../utils/Loading';
 import Chatbox from '../Chatbox'
+import { postCategory } from '../AddPost/category';
 const UserProfile = lazy(() => import('../UserProfile'))
 
 const DashboardMainFeed = ({
@@ -171,6 +172,10 @@ const DashboardMainFeed = ({
                 newPosts.sort((a, b) => (a.createdAt < b.createdAt) ? 1 : -1)
                 return newPosts
             }
+            else if(postCategory.includes(sort)) {
+                const newPosts = [...posts]
+                return newPosts.filter(post => post.category.includes(sort))
+            }
             return posts
         }
         return posts.filter(post => {
@@ -184,7 +189,7 @@ const DashboardMainFeed = ({
             dataLength={posts.length}
             next={fetchMorePost}
             hasMore={morePost}
-            loader={<div>Loading...</div>}
+            loader={<div>No posts yet..</div>}
             endMessage={
                 <p style={{ textAlign: 'center' }}>
                 <b>Yay! You have seen it all</b>
