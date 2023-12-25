@@ -4,17 +4,11 @@ const path = require('path');
 
 let storage = null;
 
-if(!process.env.PRODUCTION){
-  storage = new Storage({
-      keyFilename: path.join(__dirname, "../config/eastern-bedrock-396813-c57f6c410ede.json"),
-      projectId: "eastern-bedrock-396813",
-  });
-} else {
-  storage = new Storage({
-    keyFilename: "/etc/secrets/eastern-bedrock-396813-c57f6c410ede.json",
-    projectId: "eastern-bedrock-396813",
-  });
-}
+storage = new Storage({
+  keyFilename: "/etc/secrets/eastern-bedrock-396813-c57f6c410ede.json",
+  projectId: "eastern-bedrock-396813",
+});
+
 const bucket = storage.bucket('collab_bucket_storage');
 
 const upload = multer({

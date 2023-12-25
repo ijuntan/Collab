@@ -5,7 +5,7 @@
 /.pnp
 .pnp.js
 .env
-/src/config/eastern-bedrock-396813-c57f6c410ede.json
+/etc/secrets/eastern-bedrock-396813-c57f6c410ede.json
 # testing
 /coverage
 
